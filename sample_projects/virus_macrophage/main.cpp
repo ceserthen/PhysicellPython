@@ -73,7 +73,7 @@
 #include <omp.h>
 #include <fstream>
 
-#include "../../src/core/PhysiCell.h"
+#include "../../src/physicellcore/PhysiCell.h"
 #include "../../src/modules/PhysiCell_standard_modules.h" 
 
 // put custom code modules here! 

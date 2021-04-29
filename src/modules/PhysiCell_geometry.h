@@ -71,7 +71,7 @@
 #include <string>
 #include <vector>
 
-#include "../core/PhysiCell.h"
+#include "../physicellcore/PhysiCell.h"
 #include "./PhysiCell_settings.h"
 
 

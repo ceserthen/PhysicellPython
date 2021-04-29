@@ -76,7 +76,7 @@
 #include <random>
 #include <chrono>
 
-#include "../core/PhysiCell.h"
+#include "../physicellcore/PhysiCell.h"
 #include "../BioFVM/BioFVM_MultiCellDS.h"
 
 namespace PhysiCell{

@@ -13,6 +13,6 @@ PhysiCell_various_outputs.cpp
 )
 
 
-target_link_libraries(modules core biofvm)
+target_link_libraries(modules physicellcore biofvm)
 
 install(TARGETS modules DESTINATION lib)
