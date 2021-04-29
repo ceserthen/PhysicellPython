@@ -10,3 +10,5 @@ add_subdirectory(cancer_biorobots)
 add_subdirectory(biorobots)
 
 #Physicell Project Template
+add_subdirectory(template)
+
