@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 2.8)
 add_library(pylib SHARED
      test_py.cpp)
 
-target_link_libraries(pylib ${OpenMP_CXX_LIBRARIES} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES})
+target_link_libraries(pylib ${OpenMP_CXX_LIBRARIES} ${PYTHON_LIBRARIES})
 
 add_dependencies(pylib Boost)
 
@@ -13,3 +13,5 @@ set_target_properties(pylib PROPERTIES SUFFIX .so)
 set_target_properties(pylib PROPERTIES PREFIX "")
 
 install(TARGETS pylib DESTINATION lib)
+
+add_subdirectory(BioFVM)

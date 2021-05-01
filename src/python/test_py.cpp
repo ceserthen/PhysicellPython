@@ -1,7 +1,7 @@
 
-#include <boost/python.hpp>
+//#include <boost/python.hpp>
 
-using namespace boost::python;
+//using namespace boost::python;
 
 #include <iostream>
 #include <string>
@@ -21,12 +21,12 @@ public:
     void set_msg(std::string msg) { this->m_msg = msg; }
     std::string get_msg() const { return m_msg; }
 };
-
-
-
-BOOST_PYTHON_MODULE(pylib)
-{
-    class_< Bonjour >("Bonjour", init<std::string>())
-      .def("greet", &Bonjour::greet)
-      .add_property("msg", &Bonjour::get_msg, &Bonjour::set_msg);
-}
+//
+//
+//
+//BOOST_PYTHON_MODULE(pylib)
+//{
+//    class_< Bonjour >("Bonjour", init<std::string>())
+//      .def("greet", &Bonjour::greet)
+//      .add_property("msg", &Bonjour::get_msg, &Bonjour::set_msg);
+//}
