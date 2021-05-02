@@ -1,21 +1,14 @@
 
+//#include "../../../pybind11/include/pybind11/pybind11.h"
 #include <pybind11/pybind11.h>
-
 #include "../../../src/BioFVM/BioFVM.h"
 
 namespace py = pybind11;
 
-struct Pet {
-    Pet(const std::string &name) : name(name) { }
-    void setName(const std::string &name_) { name = name_; }
-    const std::string &getName() const { return name; }
-
-    std::string name;
-};
-
-PYBIND11_MODULE(example, m) {
-    py::class_<Pet>(m, "Pet")
-        .def(py::init<const std::string &>())
-        .def("setName", &Pet::setName)
-        .def("getName", &Pet::getName);
+PYBIND11_MODULE(biofvmpy, m) 
+{
+    py::class_<BioFVM::Microenvironment>(m, "Microenvironment")
+    .def(py::init<std::string>())
+    .def(py::init<>())
+    .def("simulate_diffusion_decay", static_cast<void (BioFVM::Microenvironment::*)(double)>(&BioFVM::Microenvironment::simulate_diffusion_decay), "advance the diffusion-decay solver by dt time");
 }

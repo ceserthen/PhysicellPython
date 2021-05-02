@@ -1,8 +1,10 @@
 cmake_minimum_required(VERSION 3.4)
 
-pybind11_add_module(example biofvm_py.cpp)
+pybind11_add_module(biofvmpy biofvm_py.cpp)
 
-install(TARGETS example DESTINATION lib)
+target_link_libraries(biofvmpy PRIVATE biofvm)
+
+install(TARGETS biofvmpy DESTINATION lib)
 
 
 
