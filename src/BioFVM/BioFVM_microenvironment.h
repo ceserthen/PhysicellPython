@@ -64,7 +64,7 @@ class Basic_Agent;
 
 class Microenvironment
 {
- private:
+ protected:
 	friend std::ostream& operator<<(std::ostream& os, const Microenvironment& S);  
 
 	/*! For internal use and accelerations in solvers */ 
