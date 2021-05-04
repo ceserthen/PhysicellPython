@@ -1,53 +1,46 @@
+/*
+#############################################################################
+#                                                                           #
+# BSD 3-Clause License (see https://opensource.org/licenses/BSD-3-Clause)   #
+#                                                                           #
+# Copyright (c) 2015-2017, Paul Macklin and the BioFVM Project              #
+# All rights reserved.                                                      #
+#                                                                           #
+# Redistribution and use in source and binary forms, with or without        #
+# modification, are permitted provided that the following conditions are    #
+# met:                                                                      #
+#                                                                           #
+# 1. Redistributions of source code must retain the above copyright notice, #
+# this list of conditions and the following disclaimer.                     #
+#                                                                           #
+# 2. Redistributions in binary form must reproduce the above copyright      #
+# notice, this list of conditions and the following disclaimer in the       #
+# documentation and/or other materials provided with the distribution.      #
+#                                                                           #
+# 3. Neither the name of the copyright holder nor the names of its          #
+# contributors may be used to endorse or promote products derived from this #
+# software without specific prior written permission.                       #
+#                                                                           #
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS       #
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED #
+# TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A           #
+# PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER #
+# OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,  #
+# EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,       #
+# PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR        #
+# PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF    #
+# LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING      #
+# NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS        #
+# SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.              #
+#                                                                           #
+#############################################################################
+*/
 
-#include "../../../pybind11/include/pybind11/pybind11.h"
-#include <pybind11/pybind11.h>
-#include <pybind11/numpy.h>
-#include <pybind11/stl.h>
-#include <pybind11/stl_bind.h>
-
-
-#include <iostream>
-#include <vector> 
-
-#include "../../../src/BioFVM/BioFVM.h"
-#include "../../../src/BioFVM/pugixml.hpp"
-#include "../../../src/modules/PhysiCell_settings.h"
-#include "../../../src/modules/PhysiCell_pugixml.h"
-
-
-namespace py = pybind11;
-
+#include "biofvm_py.h"
 
 
 namespace BioFVM_py
 {
-
-class Microenvironment_py : public BioFVM::Microenvironment {
-   
-public:
-    BioFVM::Microenvironment_Options microenvironment_options;
-    
-    Microenvironment_py();
-    Microenvironment_py( BioFVM::Microenvironment_Options const microenvironment_options_in );
-    Microenvironment_py( std::string name, std::string filename);
-    Microenvironment_py( pugi::xml_node root_node );
-    
-    bool setup_microenvironment_from_XML_node( pugi::xml_node root_node ); //TODO
-    bool setup_microenvironment_from_XML( std::string filename );
-    
-    //overwriting for internal handling of microenvironemtn options
-    //TODO: Find these dependecies to see if I need to overwrite any other internal functions
-    void display_information( std::ostream& os ); //TODO
-    void resize_densities( int new_size );//TODO
-    void add_density( void );//TODO
-    void add_density( std::string name , std::string units );//TODO
-    void add_density( std::string name , std::string units, double diffusion_constant, double decay_rate );//TODO
-    void set_density( int index , std::string name , std::string units );//TODO
-    void set_density( int index , std::string name , std::string units , double diffusion_constant , double decay_rate );//TODO
-    
-};
-
-
 
 Microenvironment_py::Microenvironment_py()
 {
@@ -100,22 +93,24 @@ Microenvironment_py::Microenvironment_py()
 
     dirichlet_activation_vectors.assign( 1 , dirichlet_activation_vector ); 
 
-    BioFVM::default_microenvironment_options.Dirichlet_all.assign( 1 , true ); 
-    BioFVM::default_microenvironment_options.Dirichlet_xmin.assign( 1 , false ); 
-    BioFVM::default_microenvironment_options.Dirichlet_xmax.assign( 1 , false ); 
-    BioFVM::default_microenvironment_options.Dirichlet_ymin.assign( 1 , false ); 
-    BioFVM::default_microenvironment_options.Dirichlet_ymax.assign( 1 , false ); 
-    BioFVM::default_microenvironment_options.Dirichlet_zmin.assign( 1 , false ); 
-    BioFVM::default_microenvironment_options.Dirichlet_zmax.assign( 1 , false ); 
-
-    BioFVM::default_microenvironment_options.Dirichlet_xmin_values.assign( 1 , 1.0 ); 
-    BioFVM::default_microenvironment_options.Dirichlet_xmax_values.assign( 1 , 1.0 ); 
-    BioFVM::default_microenvironment_options.Dirichlet_ymin_values.assign( 1 , 1.0 ); 
-    BioFVM::default_microenvironment_options.Dirichlet_ymax_values.assign( 1 , 1.0 ); 
-    BioFVM::default_microenvironment_options.Dirichlet_zmin_values.assign( 1 , 1.0 ); 
-    BioFVM::default_microenvironment_options.Dirichlet_zmax_values.assign( 1 , 1.0 ); 
-
     microenvironment_options = default_microenvironment_options;
+    
+    microenvironment_options.Dirichlet_all.assign( 1 , true ); 
+    microenvironment_options.Dirichlet_xmin.assign( 1 , false ); 
+    microenvironment_options.Dirichlet_xmax.assign( 1 , false ); 
+    microenvironment_options.Dirichlet_ymin.assign( 1 , false ); 
+    microenvironment_options.Dirichlet_ymax.assign( 1 , false ); 
+    microenvironment_options.Dirichlet_zmin.assign( 1 , false ); 
+    microenvironment_options.Dirichlet_zmax.assign( 1 , false ); 
+
+    microenvironment_options.Dirichlet_xmin_values.assign( 1 , 1.0 ); 
+    microenvironment_options.Dirichlet_xmax_values.assign( 1 , 1.0 ); 
+    microenvironment_options.Dirichlet_ymin_values.assign( 1 , 1.0 ); 
+    microenvironment_options.Dirichlet_ymax_values.assign( 1 , 1.0 ); 
+    microenvironment_options.Dirichlet_zmin_values.assign( 1 , 1.0 ); 
+    microenvironment_options.Dirichlet_zmax_values.assign( 1 , 1.0 ); 
+
+
     return;
 };
 
@@ -127,12 +122,11 @@ Microenvironment_py::Microenvironment_py(BioFVM::Microenvironment_Options microe
 };
  
 
-Microenvironment_py::Microenvironment_py( std::string name, std::string filename)
+Microenvironment_py::Microenvironment_py(std::string filename)
 {
 
     Microenvironment_py(root_node);
-    setup_microenvironment_from_XML(filename);
-    this -> name = name;
+    setup_microenvironment_from_file(filename);
     return;
 };
 Microenvironment_py::Microenvironment_py(pugi::xml_node root_node )
@@ -338,48 +332,6 @@ bool Microenvironment_py::setup_microenvironment_from_XML_node( pugi::xml_node r
 			}
 		}
 		
-		// now, figure out if individual boundaries are set 
-/*		
-		if( node1.attribute("boundaries") )
-		{
-			std::string option_string = node1.attribute("boundaries").value(); 
-			Dirichlet_all.push_back(false); 
-
-			if( strstr( option_string.c_str() , "xmin" ) )
-			{ Dirichlet_xmin.push_back( true ); }
-			else
-			{ Dirichlet_xmin.push_back( false ); }
-		
-			if( strstr( option_string.c_str() , "xmax" ) )
-			{ Dirichlet_xmax.push_back( true ); }
-			else
-			{ Dirichlet_xmax.push_back( false ); }
-		
-			if( strstr( option_string.c_str() , "ymin" ) )
-			{ Dirichlet_ymin.push_back( true ); }
-			else
-			{ Dirichlet_ymin.push_back( false ); }
-		
-			if( strstr( option_string.c_str() , "ymax" ) )
-			{ Dirichlet_ymax.push_back( true ); }
-			else
-			{ Dirichlet_ymax.push_back( false ); }
-		
-			if( strstr( option_string.c_str() , "zmin" ) )
-			{ Dirichlet_zmin.push_back( true ); }
-			else
-			{ Dirichlet_zmin.push_back( false ); }
-
-			if( strstr( option_string.c_str() , "zmax" ) )
-			{ Dirichlet_zmax.push_back( true ); }
-			else
-			{ Dirichlet_zmax.push_back( false ); }
-		}
-		else
-		{	
-			Dirichlet_all.push_back(true); 
-		}
-*/		
 		
 		// move on to the next variable (if any!)
 		node = node.next_sibling( "variable" ); 
@@ -462,7 +414,7 @@ bool Microenvironment_py::setup_microenvironment_from_XML_node( pugi::xml_node r
 	return true;  
 };
 
-bool Microenvironment_py::setup_microenvironment_from_XML( std::string filename )
+void Microenvironment_py::setup_microenvironment_from_file( std::string filename )
 {
     pugi::xml_document physicell_config_doc;
     pugi::xml_node physicell_config_root; 
@@ -473,114 +425,498 @@ bool Microenvironment_py::setup_microenvironment_from_XML( std::string filename 
     if( result.status != pugi::xml_parse_status::status_ok )
     {
         std::cout << "Error loading " << filename << "!" << std::endl; 
-        return false;
+        return;
     }
 
     physicell_config_root = physicell_config_doc.child("PhysiCell_settings");
     setup_microenvironment_from_XML_node(physicell_config_root);
-    return true;
-};
+    return;
+    return;
+}
+
+/*Add Density Functions*/
+
+void Microenvironment_py::add_density_helper( void )
+{
+    // update sources and such 
+	for( unsigned int i=0; i < temporary_density_vectors1.size() ; i++ )
+	{
+		temporary_density_vectors1[i].push_back( 0.0 ); 
+		temporary_density_vectors2[i].push_back( 0.0 ); 
+	}
+
+	// resize the gradient data structures 
+	for( unsigned int k=0 ; k < mesh.voxels.size() ; k++ )
+	{
+		gradient_vectors[k].resize( number_of_densities() ); 
+		for( unsigned int i=0 ; i < number_of_densities() ; i++ )
+		{
+			(gradient_vectors[k])[i].resize( 3, 0.0 );
+		}
+	}
+
+	gradient_vector_computed.resize( mesh.voxels.size() , false ); 	
+	
+	one_half = one; 
+	one_half *= 0.5; 
+	
+	one_third = one; 
+	one_third /= 3.0; 
+	
+	dirichlet_value_vectors.assign( mesh.voxels.size(), one ); 
+	dirichlet_activation_vector.push_back( true ); 
+	dirichlet_activation_vectors.assign( mesh.voxels.size(), dirichlet_activation_vector ); 
+	
+	// Fixes in PhysiCell preview November 2017
+	microenvironment_options.Dirichlet_condition_vector.push_back( 1.0 ); //  = one; 
+	microenvironment_options.Dirichlet_activation_vector.push_back( true ); // assign( number_of_densities(), true ); 
+	
+	microenvironment_options.initial_condition_vector.push_back( 1.0 ); 
+
+	microenvironment_options.Dirichlet_all.push_back( true ); 
+//	default_microenvironment_options.Dirichlet_interior.push_back( true );
+	microenvironment_options.Dirichlet_xmin.push_back( false ); 
+	microenvironment_options.Dirichlet_xmax.push_back( false ); 
+	microenvironment_options.Dirichlet_ymin.push_back( false ); 
+	microenvironment_options.Dirichlet_ymax.push_back( false ); 
+	microenvironment_options.Dirichlet_zmin.push_back( false ); 
+	microenvironment_options.Dirichlet_zmax.push_back( false ); 
+	
+	microenvironment_options.Dirichlet_xmin_values.push_back( 1.0 ); 
+	microenvironment_options.Dirichlet_xmax_values.push_back( 1.0 ); 
+	microenvironment_options.Dirichlet_ymin_values.push_back( 1.0 ); 
+	microenvironment_options.Dirichlet_ymax_values.push_back( 1.0 ); 
+	microenvironment_options.Dirichlet_zmin_values.push_back( 1.0 ); 
+	microenvironment_options.Dirichlet_zmax_values.push_back( 1.0 ); 
+	
+    return;
+    
+}
+
+void Microenvironment_py::resize_densities( int new_size )
+{
+	zero.assign( new_size, 0.0 ); 
+	one.assign( new_size , 1.0 );
+
+	temporary_density_vectors1.assign( mesh.voxels.size() , zero );
+	temporary_density_vectors2.assign( mesh.voxels.size() , zero );
+
+	for( unsigned int k=0 ; k < mesh.voxels.size() ; k++ )
+	{
+		gradient_vectors[k].resize( number_of_densities() ); 
+		for( unsigned int i=0 ; i < number_of_densities() ; i++ )
+		{
+			(gradient_vectors[k])[i].resize( 3, 0.0 );
+		}
+	}
+	gradient_vector_computed.resize( mesh.voxels.size() , false ); 	
+	
+	diffusion_coefficients.assign( new_size , 0.0 ); 
+	decay_rates.assign( new_size , 0.0 ); 
+
+	density_names.assign( new_size, "unnamed" ); 
+	density_units.assign( new_size , "none" ); 
+
+	one_half = one; 
+	one_half *= 0.5; 
+	
+	one_third = one; 
+	one_third /= 3.0; 
+	
+	dirichlet_value_vectors.assign( mesh.voxels.size(), one ); 
+	dirichlet_activation_vector.assign( new_size, true ); 
+
+	dirichlet_activation_vectors.assign( mesh.voxels.size(), dirichlet_activation_vector ); 
+
+	microenvironment_options.Dirichlet_condition_vector.assign( new_size , 1.0 );  
+	microenvironment_options.Dirichlet_activation_vector.assign( new_size, true ); 
+	
+	microenvironment_options.initial_condition_vector.assign( new_size , 1.0 ); 
+	
+	microenvironment_options.Dirichlet_all.assign( new_size , true ); 
+//	default_microenvironment_options.Dirichlet_interior.assign( new_size, true );
+	microenvironment_options.Dirichlet_xmin.assign( new_size , false ); 
+	microenvironment_options.Dirichlet_xmax.assign( new_size , false ); 
+	microenvironment_options.Dirichlet_ymin.assign( new_size , false ); 
+	microenvironment_options.Dirichlet_ymax.assign( new_size , false ); 
+	microenvironment_options.Dirichlet_zmin.assign( new_size , false ); 
+	microenvironment_options.Dirichlet_zmax.assign( new_size , false ); 
+	
+	microenvironment_options.Dirichlet_xmin_values.assign( new_size , 1.0 ); 
+	microenvironment_options.Dirichlet_xmax_values.assign( new_size , 1.0 ); 
+	microenvironment_options.Dirichlet_ymin_values.assign( new_size , 1.0 ); 
+	microenvironment_options.Dirichlet_ymax_values.assign( new_size , 1.0 ); 
+	microenvironment_options.Dirichlet_zmin_values.assign( new_size , 1.0 ); 
+	microenvironment_options.Dirichlet_zmax_values.assign( new_size , 1.0 ); 
+
+	return; 
+}
+
+
+void Microenvironment_py::add_density( void )
+{
+	// fix in PhysiCell preview November 2017 
+	// default_microenvironment_options.use_oxygen_as_first_field = false; 
+	
+	// update 1, 0 
+	zero.push_back( 0.0 ); 
+	one.push_back( 1.0 );
+	
+	// update units
+	density_names.push_back( "unnamed" ); 
+	density_units.push_back( "none" ); 
+
+	// update coefficients 
+	diffusion_coefficients.push_back( 0.0 ); 
+	decay_rates.push_back( 0.0 ); 
+	
+    add_density_helper();
+	
+	return; 
+}
+
+void Microenvironment_py::add_density( std::string name , std::string units )
+{
+	// fix in PhysiCell preview November 2017 
+	// default_microenvironment_options.use_oxygen_as_first_field = false; 
+	
+	// update 1, 0 
+	zero.push_back( 0.0 ); 
+	one.push_back( 1.0 );
+
+	// update units
+	density_names.push_back( name ); 
+	density_units.push_back( units ); 
+
+	// update coefficients 
+	diffusion_coefficients.push_back( 0.0 ); 
+	decay_rates.push_back( 0.0 ); 
+	
+	add_density_helper(); 
+	
+	return; 
+}
+
+void Microenvironment_py::add_density( std::string name , std::string units, double diffusion_constant, double decay_rate )
+{
+	// fix in PhysiCell preview November 2017 
+	// default_microenvironment_options.use_oxygen_as_first_field = false; 
+	
+	// update 1, 0 
+	zero.push_back( 0.0 ); 
+	one.push_back( 1.0 );
+	
+	// update units
+	density_names.push_back( name ); 
+	density_units.push_back( units ); 
+
+	// update coefficients 
+	diffusion_coefficients.push_back( diffusion_constant ); 
+	decay_rates.push_back( decay_rate );
+ 
+    add_density_helper(); 
+    
+    return;
+}
+
+void Microenvironment_py::set_density( int index , std::string name , std::string units )
+{
+	// fix in PhysiCell preview November 2017 
+	if( index == 0 )
+	{ microenvironment_options.use_oxygen_as_first_field = false; }
+	
+	density_names[index] = name; 
+	density_units[index] = units; 
+	return; 
+}
+
+void Microenvironment_py::set_density( int index , std::string name , std::string units , double diffusion_constant , double decay_rate )
+{
+	// fix in PhysiCell preview November 2017 
+	if( index == 0 )
+	{ microenvironment_options.use_oxygen_as_first_field = false; }
+	
+	density_names[index] = name; 
+	density_units[index] = units; 
+	
+	diffusion_coefficients[index] = diffusion_constant; 
+	decay_rates[index] = decay_rate;	
+	return; 
+}
+
+
+void Microenvironment_py::initialize_microenvironment( void )
+{
+	// create and name a microenvironment; 
+	name = microenvironment_options.name;
+	// register the diffusion solver 
+	if( microenvironment_options.simulate_2D == true )
+	{
+		diffusion_decay_solver = diffusion_decay_solver__constant_coefficients_LOD_2D; 
+	}
+	else
+	{
+		diffusion_decay_solver = diffusion_decay_solver__constant_coefficients_LOD_3D; 
+	}
+	
+	// set the default substrate to oxygen (with typical units of mmHg)
+	if( microenvironment_options.use_oxygen_as_first_field == true )
+	{
+		set_density(0, "oxygen" , "mmHg" );
+		diffusion_coefficients[0] = 1e5; 
+		decay_rates[0] = 0.1; 
+	}
+	
+	// resize the microenvironment  
+	if( microenvironment_options.simulate_2D == true )
+	{
+		microenvironment_options.Z_range[0] = -microenvironment_options.dz/2.0; 
+		microenvironment_options.Z_range[1] = microenvironment_options.dz/2.0;
+	}
+	resize_space( microenvironment_options.X_range[0], microenvironment_options.X_range[1] , 
+		microenvironment_options.Y_range[0], microenvironment_options.Y_range[1], 
+		microenvironment_options.Z_range[0], microenvironment_options.Z_range[1], 
+		microenvironment_options.dx,microenvironment_options.dy,microenvironment_options.dz );
+		
+	// set units
+	spatial_units = microenvironment_options.spatial_units;
+	time_units = microenvironment_options.time_units;
+	mesh.units = microenvironment_options.spatial_units;
+
+	// set the initial densities to the values set in the initial_condition_vector
+	
+	// if the initial condition vector has not been set, use the Dirichlet condition vector 
+	if( microenvironment_options.initial_condition_vector.size() != 
+		number_of_densities() )
+	{
+		std::cout << "BioFVM Warning: Initial conditions not set. " << std::endl 
+				  << "                Using Dirichlet condition vector to set initial substrate values!" << std::endl 
+				  << "                In the future, set microenvironment_options.initial_condition_vector." 
+				  << std::endl << std::endl;  
+		microenvironment_options.initial_condition_vector = microenvironment_options.Dirichlet_condition_vector; 
+	}
+
+	// set the initial condition 
+	for( unsigned int n=0; n < number_of_voxels() ; n++ )
+	{ density_vector(n) = microenvironment_options.initial_condition_vector; }
+
+	// now, figure out which sides have BCs (for at least one substrate): 
+
+	bool xmin = false; 
+	bool xmax = false; 
+	bool ymin = false; 
+	bool ymax = false; 
+	bool zmin = false; 
+	bool zmax = false; 
+	
+	if( microenvironment_options.outer_Dirichlet_conditions == true )
+	{
+		for( int n=0 ; n < number_of_densities() ; n++ )
+		{
+			if( microenvironment_options.Dirichlet_all[n] || 
+				microenvironment_options.Dirichlet_xmin[n] )
+				{ xmin = true; }
+			
+			if( microenvironment_options.Dirichlet_all[n] || 
+				microenvironment_options.Dirichlet_xmax[n] )
+				{ xmax = true; }
+			
+			if( microenvironment_options.Dirichlet_all[n] || 
+				microenvironment_options.Dirichlet_ymin[n] )
+				{ ymin = true; }
+			
+			if( microenvironment_options.Dirichlet_all[n] || 
+				microenvironment_options.Dirichlet_ymax[n] )
+				{ ymax = true; }
+				
+			if( microenvironment_options.Dirichlet_all[n] || 
+				microenvironment_options.Dirichlet_zmin[n] )
+				{ zmin = true; }
+			
+			if( microenvironment_options.Dirichlet_all[n] || 
+				microenvironment_options.Dirichlet_zmax[n] )
+				{ zmax = true; }
+		}
+		
+		// add the Dirichlet nodes in the right places 
+		
+	}
+	std::cout << "which boundaries?" << std::endl; 
+	std::cout << xmin << " " << xmax << " " << ymin << " " << ymax << " " << zmin << " " << zmax << std::endl; 
+
+	// add the Dirichlet nodes in the right places 
+	// now, go in and set the values 
+	if( microenvironment_options.outer_Dirichlet_conditions == true ) 
+	{
+		// set xmin if xmin = true or all = true 
+		if( xmin == true )
+		{
+			for( unsigned int k=0 ; k < mesh.z_coordinates.size() ; k++ )
+			{
+				int I = 0; 
+				// set Dirichlet conditions along the xmin outer edges 
+				for( unsigned int j=0 ; j < mesh.y_coordinates.size() ; j++ )
+				{
+					// set the value 
+					add_dirichlet_node( voxel_index(I,j,k) , microenvironment_options.Dirichlet_xmin_values );
+					
+					// set the activation 
+					set_substrate_dirichlet_activation( voxel_index(I,j,k) , 
+					microenvironment_options.Dirichlet_xmin ); 
+					
+				}
+			}
+		}			
+		
+		// set xmax if xmax = true or all = true 
+		if( xmax == true )
+		{
+			for( unsigned int k=0 ; k < mesh.z_coordinates.size() ; k++ )
+			{
+				int I = mesh.x_coordinates.size()-1;; 
+				// set Dirichlet conditions along the xmax outer edges 
+				for( unsigned int j=0 ; j < mesh.y_coordinates.size() ; j++ )
+				{
+					// set the values 
+					add_dirichlet_node( voxel_index(I,j,k) , microenvironment_options.Dirichlet_xmax_values );
+					
+					// set the activation 
+					set_substrate_dirichlet_activation( voxel_index(I,j,k) , 
+					microenvironment_options.Dirichlet_xmax ); 
+				}
+			}
+		}			
+		
+		// set ymin if ymin = true or all = true 
+		if( ymin == true )
+		{
+			for( unsigned int k=0 ; k < mesh.z_coordinates.size() ; k++ )
+			{
+				int J = 0; // mesh.x_coordinates.size()-1;; 
+				// set Dirichlet conditions along the ymin outer edges 
+				for( unsigned int i=0 ; i < mesh.x_coordinates.size() ; i++ )
+				{
+					// set the values 
+					add_dirichlet_node( voxel_index(i,J,k) , microenvironment_options.Dirichlet_ymin_values );
+					
+					// set the activation 
+					set_substrate_dirichlet_activation( voxel_index(i,J,k) , 
+					microenvironment_options.Dirichlet_ymin ); 
+				}
+			}
+		}	
+		
+		// set ymzx if ymax = true or all = true; 
+		if( ymax == true )
+		{
+			for( unsigned int k=0 ; k < mesh.z_coordinates.size() ; k++ )
+			{
+				int J = mesh.y_coordinates.size()-1;; 
+				// set Dirichlet conditions along the ymin outer edges 
+				for( unsigned int i=0 ; i < mesh.x_coordinates.size() ; i++ )
+				{
+					// set the value 
+					add_dirichlet_node( voxel_index(i,J,k) , microenvironment_options.Dirichlet_ymax_values );
+					
+					// set the activation 
+					set_substrate_dirichlet_activation( voxel_index(i,J,k) , 
+					microenvironment_options.Dirichlet_ymax ); 
+				}
+			}
+		}	
+		
+		// if not 2D:
+		if( microenvironment_options.simulate_2D == false )
+		{
+			// set zmin if zmin = true or all = true 
+			if( zmin == true )
+			{
+				for( unsigned int j=0 ; j < mesh.y_coordinates.size() ; j++ )
+				{
+					int K = 0; // mesh.z_coordinates.size()-1;; 
+					// set Dirichlet conditions along the ymin outer edges 
+					for( unsigned int i=0 ; i < mesh.x_coordinates.size() ; i++ )
+					{
+						// set the value 
+						add_dirichlet_node( voxel_index(i,j,K) , microenvironment_options.Dirichlet_zmin_values );
+					
+						// set the activation 
+						set_substrate_dirichlet_activation( voxel_index(i,j,K) , 
+						microenvironment_options.Dirichlet_zmin ); 
+					}
+				}
+			}				
+			
+			// set zmax if zmax = true or all = true 
+			if( zmax == true )
+			{
+				for( unsigned int j=0 ; j < mesh.y_coordinates.size() ; j++ )
+				{
+					int K = mesh.z_coordinates.size()-1;; 
+					// set Dirichlet conditions along the ymin outer edges 
+					for( unsigned int i=0 ; i < mesh.x_coordinates.size() ; i++ )
+					{
+						// set the value 
+						add_dirichlet_node( voxel_index(i,j,K) , microenvironment_options.Dirichlet_zmax_values );
+						
+						// set the activation 
+						set_substrate_dirichlet_activation( voxel_index(i,j,K) , 
+						microenvironment_options.Dirichlet_zmax ); 						
+					}
+				}
+			}				
+		}
+		
+	}
+	
+	// set the Dirichlet condition activation vector to match the microenvironment options 
+	for( int i=0 ; i < microenvironment_options.Dirichlet_activation_vector.size(); i++ )
+	{
+		set_substrate_dirichlet_activation( i , microenvironment_options.Dirichlet_activation_vector[i] ); 
+	}
+	
+	display_information( std::cout );
+	return;
+}
+
+
+void Microenvironment_py::display_information( std::ostream& os )
+{
+	os << std::endl << "Microenvironment summary: " << name << ": " << std::endl; 
+	mesh.display_information( os ); 
+	os << "Densities: (" << number_of_densities() << " total)" << std::endl; 
+	for( unsigned int i = 0 ; i < density_names.size() ; i++ )
+	{
+		os << "   " << density_names[i] << ":" << std::endl
+		<< "     units: " << density_units[i] << std::endl 
+		<< "     diffusion coefficient: " << diffusion_coefficients[i]  
+			<< " " << spatial_units << "^2 / " << time_units << std::endl
+		<< "     decay rate: " << decay_rates[i] 
+			<< " " << time_units << "^-1" << std::endl 
+		<< "     diffusion length scale: " << sqrt( diffusion_coefficients[i] / ( 1e-12 + decay_rates[i] ) ) 
+			<< " " << spatial_units << std::endl 
+		<< "     initial condition: " << microenvironment_options.initial_condition_vector[i] 
+			<< " " << density_units[i] << std::endl 
+		<< "     boundary condition: " << microenvironment_options.Dirichlet_condition_vector[i] 
+			<< " " << density_units[i] << " (enabled: "; 
+		if( dirichlet_activation_vector[i] == true )
+		{ os << "true"; }
+		else
+		{ os << "false"; }
+		os << ")" << std::endl; 
+	}
+	os << std::endl; 
+	
+	return; 
+}
+
+
+void Microenvironment_py::display_info ( void )
+{
+ display_information(std::cout);   
+    
+}
 
 }; //end namespace BioFVM
 
-PYBIND11_MAKE_OPAQUE(std::vector<std::string, std::allocator<std::string>>);
-using StringList = std::vector<std::string, std::allocator<std::string>>;
 
-PYBIND11_MAKE_OPAQUE(std::vector<double, std::allocator<double>>);
-using DoubleList = std::vector<double, std::allocator<double>>;
-PYBIND11_MAKE_OPAQUE(std::vector<std::vector<double>>);
-
-
-PYBIND11_MODULE(biofvmpy, m) 
-{
-    
-    py::bind_vector<std::vector<double>>(m, "VectorDouble");
-    py::bind_vector<std::vector<std::string>>(m, "VectorString");
-    
-    //TODO: Not currently working DAB 05-03-21
-    //py::bind_vector<std::vector<std::vector<double>>>(m, "VectorVectorDouble");
-    
-    
-    
-    py::class_<BioFVM::Microenvironment>(m, "Microenvironment")
-    //constructors
-    .def(py::init<std::string>())
-    .def(py::init<>())
-    
-    //attributes
-    .def_readwrite("name", &BioFVM::Microenvironment::name)
-    .def_readwrite("spatial_units", &BioFVM::Microenvironment::spatial_units)
-    .def_readwrite("time_units", &BioFVM::Microenvironment::time_units)
-    
-    //diffusing entities
-    .def_readwrite("density_names", &BioFVM::Microenvironment::density_names) 
-    
-    //coefficients
-    .def_readwrite("diffusion_coefficients", &BioFVM::Microenvironment::diffusion_coefficients)
-    .def_readwrite("decay_rates", &BioFVM::Microenvironment::decay_rates)
-    .def_readwrite("supply_target_densities_times_supply_rates", &BioFVM::Microenvironment::supply_target_densities_times_supply_rates)
-    .def_readwrite("supply_rates", &BioFVM::Microenvironment::supply_rates)
-    .def_readwrite("uptake_rates", &BioFVM::Microenvironment::uptake_rates)
-    
-    .def("update_rates", static_cast<void (BioFVM::Microenvironment::*)(void)>(&BioFVM::Microenvironment::update_rates), "Update the rate coefficients")
-    
-    //TODO Function pointers for solvers
-    //     void (*diffusion_decay_solver)( Microenvironment&, double); 
-    // void (*bulk_supply_rate_function)( Microenvironment* pMicroenvironment, int voxel_index, std::vector<double>* write_destination );
-    // void (*bulk_supply_target_densities_function)( Microenvironment* pMicroenvironment, int voxel_index, std::vector<double>* write_destination );
-    // void (*bulk_uptake_rate_function)( Microenvironment* pMicroenvironment, int voxel_index, std::vector<double>* write_destination );
-    
-    /*! functions to simplify size queries */ 
-    .def("number_of_densities", static_cast<unsigned int (BioFVM::Microenvironment::*)(void)>(&BioFVM::Microenvironment::number_of_densities), "number_of_densities")
-    .def("number_of_voxels", static_cast<unsigned int (BioFVM::Microenvironment::*)(void)>(&BioFVM::Microenvironment::number_of_voxels), "number_of_voxels")
-    .def("number_of_voxel_faces", static_cast<unsigned int (BioFVM::Microenvironment::*)(void)>(&BioFVM::Microenvironment::number_of_voxel_faces), "number_of_voxel_faces")
-    
-    .def("auto_choose_diffusion_decay_solver", static_cast<void (BioFVM::Microenvironment::*)(void)>(&BioFVM::Microenvironment::auto_choose_diffusion_decay_solver), "auto_choose_diffusion_decay_solver")
-    
-    .def("resize_voxels", static_cast<void (BioFVM::Microenvironment::*)(int)>(&BioFVM::Microenvironment::resize_voxels), "resize_voxels: enter the new number of voxels")
-    
-    .def("resize_space", static_cast<void (BioFVM::Microenvironment::*)(int, int, int)>(&BioFVM::Microenvironment::resize_space), "resize_space")
-    .def("resize_space", static_cast<void (BioFVM::Microenvironment::*)(double, double, double, double, double, double, int, int, int)>(&BioFVM::Microenvironment::resize_space), "resize_space")
-    .def("resize_space", static_cast<void (BioFVM::Microenvironment::*)(double,double,double,double,double,double,double,double,double)> (&BioFVM::Microenvironment::resize_space), "resize_space")
-    
-    .def("resize_space_uniform", static_cast<void (BioFVM::Microenvironment::*)(double,double,double,double,double,double,double)> (&BioFVM::Microenvironment::resize_space_uniform), "resize_space_uniform")
-    
-    //simulation methods
-    .def("simulate_diffusion_decay", static_cast<void (BioFVM::Microenvironment::*)(double)>(&BioFVM::Microenvironment::simulate_diffusion_decay), "advance the diffusion-decay solver by dt time");
-    
-    
-    py::class_<BioFVM_py::Microenvironment_py, BioFVM::Microenvironment>(m, "Microenvironmentpy")
-    //constructors    
-        .def(py::init<>())
-        .def(py::init<BioFVM::Microenvironment_Options>())
-        .def(py::init<std::string, std::string>())
-        .def(py::init<pugi::xml_node>())
-    
-    //XML readers
-        .def("setup_microenvironment_from_XML_node", static_cast<bool (BioFVM_py::Microenvironment_py::*)(pugi::xml_node)>(&BioFVM_py::Microenvironment_py::setup_microenvironment_from_XML_node), "Load microenvironment settings from an XML node ");
-        
-        //.def("setup_microenvironment_from_XML", static_cast<bool (BioFVM_py::Microenvironment_py::*)(std::string)>(&BioFVM_py::Microenvironment_py::setup_microenvironment_from_XML, "Load microenvironment settings from an XML File ");
-}
-
-// public:
-//     BioFVM::Microenvironment_Options microenvironment_options;
-//     
-//     Microenvironment_py();
-//     Microenvironment_py( BioFVM::Microenvironment_Options const microenvironment_options_in );
-//     Microenvironment_py( std::string name, std::string filename);
-//     Microenvironment_py( pugi::xml_node root_node );
-//     
-//     bool setup_microenvironment_from_XML_node( pugi::xml_node root_node ); //TODO
-//     bool setup_microenvironment_from_XML( std::string filename );
-//     
-//     //overwriting for internal handling of microenvironemtn options
-//     //TODO: Find these dependecies to see if I need to overwrite any other internal functions
-//     void display_information( std::ostream& os ); //TODO
-//     void resize_densities( int new_size );//TODO
-//     void add_density( void );//TODO
-//     void add_density( std::string name , std::string units );//TODO
-//     void add_density( std::string name , std::string units, double diffusion_constant, double decay_rate );//TODO
-//     void set_density( int index , std::string name , std::string units );//TODO
-//     void set_density( int index , std::string name , std::string units , double diffusion_constant , double decay_rate );//TODO
-//     
-// };
