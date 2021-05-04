@@ -64,9 +64,8 @@ public:
     void display_info (void);
     
     //overwriting for internal handling of microenvironemtn options
-    //TODO: Find these dependecies to see if I need to overwrite any other internal functions
     void display_information( std::ostream& os );
-    void resize_densities( int new_size );//TODO
+    void resize_densities( int new_size );
     void add_density( void );
     void add_density( std::string name , std::string units );
     void add_density( std::string name , std::string units, double diffusion_constant, double decay_rate );

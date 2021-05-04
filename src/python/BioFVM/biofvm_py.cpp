@@ -141,277 +141,306 @@ bool Microenvironment_py::setup_microenvironment_from_XML_node( pugi::xml_node r
 {
     pugi::xml_node node; 
 
-	// First, look for the correct XML node. 
-	// If it isn't there, return false. 
-	
-	node = PhysiCell::xml_find_node( root_node , "microenvironment_setup" );
-	if( !node )
-	{ return false; }
+    // First, look for the correct XML node. 
+    // If it isn't there, return false. 
 
-	// now that we're using the XML to specify the microenvironment, don't 
-	// use old defaults 
-	
-	// Don't let BioFVM use oxygen as the default 
-	
-	microenvironment_options.use_oxygen_as_first_field = false; 
+    node = PhysiCell::xml_find_node( root_node , "microenvironment_setup" );
+    if( !node )
+    { return false; }
 
-	std::vector<double> initial_condition_vector = {}; 
-	std::vector<double> Dirichlet_condition_vector = {}; 
-	std::vector<bool> Dirichlet_activation_vector = {}; 
+    // now that we're using the XML to specify the microenvironment, don't 
+    // use old defaults 
 
-	std::vector<bool> Dirichlet_all = {}; 
-	std::vector<bool> Dirichlet_xmin = {}; 
-	std::vector<bool> Dirichlet_xmax = {}; 
-	std::vector<bool> Dirichlet_ymin = {}; 
-	std::vector<bool> Dirichlet_ymax = {}; 
-	std::vector<bool> Dirichlet_zmin = {}; 
-	std::vector<bool> Dirichlet_zmax = {}; 
+    // Don't let BioFVM use oxygen as the default 
 
-	std::vector<double> Dirichlet_xmin_values = {}; 
-	std::vector<double> Dirichlet_xmax_values = {}; 
-	std::vector<double> Dirichlet_ymin_values = {}; 
-	std::vector<double> Dirichlet_ymax_values = {}; 
-	std::vector<double> Dirichlet_zmin_values = {}; 
-	std::vector<double> Dirichlet_zmax_values = {}; 
-	std::vector<double> Dirichlet_interior_values = {}; 
+    microenvironment_options.use_oxygen_as_first_field = false; 
+
+    std::vector<double> initial_condition_vector = {}; 
+    std::vector<double> Dirichlet_condition_vector = {}; 
+    std::vector<bool> Dirichlet_activation_vector = {}; 
+
+    std::vector<bool> Dirichlet_all = {}; 
+    std::vector<bool> Dirichlet_xmin = {}; 
+    std::vector<bool> Dirichlet_xmax = {}; 
+    std::vector<bool> Dirichlet_ymin = {}; 
+    std::vector<bool> Dirichlet_ymax = {}; 
+    std::vector<bool> Dirichlet_zmin = {}; 
+    std::vector<bool> Dirichlet_zmax = {}; 
+
+    std::vector<double> Dirichlet_xmin_values = {}; 
+    std::vector<double> Dirichlet_xmax_values = {}; 
+    std::vector<double> Dirichlet_ymin_values = {}; 
+    std::vector<double> Dirichlet_ymax_values = {}; 
+    std::vector<double> Dirichlet_zmin_values = {}; 
+    std::vector<double> Dirichlet_zmax_values = {}; 
+    std::vector<double> Dirichlet_interior_values = {}; 
 
 
-	// next, add all the substrates to the microenvironment
-	// build the initial conditions and Dirichlet conditions as we go 
+    // next, add all the substrates to the microenvironment
+    // build the initial conditions and Dirichlet conditions as we go 
 
-	// find the first substrate 
-	pugi::xml_node node1 = node.child( "variable" ); // xml_find_node( node , "variable" ); 
-	node = node1; 
-	int i = 0; 
-	
-	bool activated_Dirichlet_boundary_detected = false; 
-	
-	while( node )
-	{
-		// get the name and units 
-		std::string name = node.attribute( "name" ).value(); 
-		std::string units = node.attribute( "units" ).value(); 
-		
-		// add the substrate 
-		if( i == 0 )
-		{ set_density( 0, name, units ); }
-		else
-		{ add_density( name, units ); }
-		
-		// get the diffusion and decay parameters 
-		node1 = PhysiCell::xml_find_node( node, "physical_parameter_set" ); 
-		
-		diffusion_coefficients[i] = 
-			PhysiCell::xml_get_double_value( node1, "diffusion_coefficient" ); 
-		decay_rates[i] = 
-			PhysiCell::xml_get_double_value( node1, "decay_rate" ); 
-			
-		// now, get the initial value  
-		node1 = PhysiCell::xml_find_node( node, "initial_condition" ); 
-		initial_condition_vector.push_back( PhysiCell::xml_get_my_double_value(node1) );
-		
-		// now, get the Dirichlet value
-		node1 = PhysiCell::xml_find_node( node, "Dirichlet_boundary_condition" ); 
-		Dirichlet_condition_vector.push_back( PhysiCell::xml_get_my_double_value(node1) );
+    // find the first substrate 
+    pugi::xml_node node1 = node.child( "variable" ); // xml_find_node( node , "variable" ); 
+    node = node1; 
+    int i = 0; 
 
-		// now, decide whether or not to enable it 
-		Dirichlet_activation_vector.push_back( node1.attribute("enabled").as_bool() );
+    bool activated_Dirichlet_boundary_detected = false; 
 
-		Dirichlet_all.push_back( Dirichlet_activation_vector[i] ); 
-		if( Dirichlet_activation_vector[i] )
-		{ activated_Dirichlet_boundary_detected = true; }
-		
-		// default interior activation will mirror the boundary 
-		
-		Dirichlet_xmin.push_back( Dirichlet_activation_vector[i] ); 
-		Dirichlet_xmax.push_back( Dirichlet_activation_vector[i] ); 
-		Dirichlet_ymin.push_back( Dirichlet_activation_vector[i] ); 
-		Dirichlet_ymax.push_back( Dirichlet_activation_vector[i] ); 
-		Dirichlet_zmin.push_back( Dirichlet_activation_vector[i] ); 
-		Dirichlet_zmax.push_back( Dirichlet_activation_vector[i] ); 
-		
-		Dirichlet_xmin_values.push_back( Dirichlet_condition_vector[i] ); 
-		Dirichlet_xmax_values.push_back( Dirichlet_condition_vector[i] ); 
-		Dirichlet_ymin_values.push_back( Dirichlet_condition_vector[i] ); 
-		Dirichlet_ymax_values.push_back( Dirichlet_condition_vector[i] ); 
-		Dirichlet_zmin_values.push_back( Dirichlet_condition_vector[i] ); 
-		Dirichlet_zmax_values.push_back( Dirichlet_condition_vector[i] ); 
-		
-		// now figure out finer-grained controls 
-		
-		node1 = node.child( "Dirichlet_options" );
-		if( node1 )
-		{
-			// xmin, xmax, ymin, ymax, zmin, zmax, interior 
-			pugi::xml_node node2 = node1.child("boundary_value"); 
-			
-			while( node2 )
-			{
-				// which boundary? 
-				std::string boundary_ID = node2.attribute("ID").value(); 
-				
-				// xmin 
-				if( std::strstr( boundary_ID.c_str() , "xmin" ) )
-				{
-					// on or off 
-					Dirichlet_xmin[i] = node2.attribute("enabled").as_bool();
-					// if there is at least one off bondary here, "all" is false for this substrate 
-					if( node2.attribute("enabled").as_bool() == false )
-					{ Dirichlet_all[i] = false; }
-					
-					// which value 
-					{ Dirichlet_xmin_values[i] = PhysiCell::xml_get_my_double_value( node2 ); }
-				}
-				
-				// xmax 
-				if( std::strstr( boundary_ID.c_str() , "xmax" ) )
-				{
-					// on or off 
-					Dirichlet_xmax[i] = node2.attribute("enabled").as_bool();
-					// if there is at least one off bondary here, "all" is false for this substrate 
-					if( node2.attribute("enabled").as_bool() == false )
-					{ Dirichlet_all[i] = false; }
-				
-					// which value 
-					{ Dirichlet_xmax_values[i] = PhysiCell::xml_get_my_double_value( node2 ); }
-				}
-				
-				// ymin 
-				if( std::strstr( boundary_ID.c_str() , "ymin" ) )
-				{
-					// on or off 
-					Dirichlet_ymin[i] = node2.attribute("enabled").as_bool();
-					// if there is at least one off bondary here, "all" is false for this substrate 
-					if( node2.attribute("enabled").as_bool() == false )
-					{ Dirichlet_all[i] = false; }
-				
-					// which value 
-					{ Dirichlet_ymin_values[i] = PhysiCell::xml_get_my_double_value( node2 ); }
-				}
-				
-				// ymax 
-				if( std::strstr( boundary_ID.c_str() , "ymax" ) )
-				{
-					// on or off 
-					Dirichlet_ymax[i] = node2.attribute("enabled").as_bool();
-					// if there is at least one off bondary here, "all" is false for this substrate 
-					if( node2.attribute("enabled").as_bool() == false )
-					{ Dirichlet_all[i] = false; }					
-					
-					// which value 
-					{ Dirichlet_ymax_values[i] = PhysiCell::xml_get_my_double_value( node2 ); }
-				}				
-								
-				// zmin 
-				if( std::strstr( boundary_ID.c_str() , "zmin" ) )
-				{
-					// on or off 
-					Dirichlet_zmin[i] = node2.attribute("enabled").as_bool();
-					// if there is at least one off bondary here, "all" is false for this substrate 
-					if( node2.attribute("enabled").as_bool() == false )
-					{ Dirichlet_all[i] = false; }
-				
-					// which value 
-					{ Dirichlet_zmin_values[i] = PhysiCell::xml_get_my_double_value( node2 ); }
-				}
-				
-				// zmax 
-				if( std::strstr( boundary_ID.c_str() , "zmax" ) )
-				{
-					// on or off 
-					Dirichlet_zmax[i] = node2.attribute("enabled").as_bool();
-					// if there is at least one off bondary here, "all" is false for this substrate 
-					if( node2.attribute("enabled").as_bool() == false )
-					{ Dirichlet_all[i] = false; }
-				
-					// which value 
-					{ Dirichlet_zmax_values[i] = PhysiCell::xml_get_my_double_value( node2 ); }
-				}
-				
-				node2 = node2.next_sibling("boundary_value"); 
-			}
-		}
-		
-		
-		// move on to the next variable (if any!)
-		node = node.next_sibling( "variable" ); 
-		i++; 
-	}
+    while( node )
+    {
+        // get the name and units 
+        std::string name = node.attribute( "name" ).value(); 
+        std::string units = node.attribute( "units" ).value(); 
+        
+        // add the substrate 
+        if( i == 0 )
+        { set_density( 0, name, units ); }
+        else
+        { add_density( name, units ); }
+        
+        // get the diffusion and decay parameters 
+        node1 = PhysiCell::xml_find_node( node, "physical_parameter_set" ); 
+        
+        diffusion_coefficients[i] = 
+            PhysiCell::xml_get_double_value( node1, "diffusion_coefficient" ); 
+        decay_rates[i] = 
+            PhysiCell::xml_get_double_value( node1, "decay_rate" ); 
+            
+        // now, get the initial value  
+        node1 = PhysiCell::xml_find_node( node, "initial_condition" ); 
+        initial_condition_vector.push_back( PhysiCell::xml_get_my_double_value(node1) );
+        
+        // now, get the Dirichlet value
+        node1 = PhysiCell::xml_find_node( node, "Dirichlet_boundary_condition" ); 
+        Dirichlet_condition_vector.push_back( PhysiCell::xml_get_my_double_value(node1) );
 
-	// now that all the variables and boundary / initial conditions are defined, 
-	// make sure that BioFVM knows about them 
+        // now, decide whether or not to enable it 
+        Dirichlet_activation_vector.push_back( node1.attribute("enabled").as_bool() );
 
-	microenvironment_options.Dirichlet_condition_vector = Dirichlet_condition_vector;  
-	microenvironment_options.Dirichlet_activation_vector = Dirichlet_activation_vector;
-	microenvironment_options.initial_condition_vector = initial_condition_vector; 
+        Dirichlet_all.push_back( Dirichlet_activation_vector[i] ); 
+        if( Dirichlet_activation_vector[i] )
+        { activated_Dirichlet_boundary_detected = true; }
+        
+        // default interior activation will mirror the boundary 
+        
+        Dirichlet_xmin.push_back( Dirichlet_activation_vector[i] ); 
+        Dirichlet_xmax.push_back( Dirichlet_activation_vector[i] ); 
+        Dirichlet_ymin.push_back( Dirichlet_activation_vector[i] ); 
+        Dirichlet_ymax.push_back( Dirichlet_activation_vector[i] ); 
+        Dirichlet_zmin.push_back( Dirichlet_activation_vector[i] ); 
+        Dirichlet_zmax.push_back( Dirichlet_activation_vector[i] ); 
+        
+        Dirichlet_xmin_values.push_back( Dirichlet_condition_vector[i] ); 
+        Dirichlet_xmax_values.push_back( Dirichlet_condition_vector[i] ); 
+        Dirichlet_ymin_values.push_back( Dirichlet_condition_vector[i] ); 
+        Dirichlet_ymax_values.push_back( Dirichlet_condition_vector[i] ); 
+        Dirichlet_zmin_values.push_back( Dirichlet_condition_vector[i] ); 
+        Dirichlet_zmax_values.push_back( Dirichlet_condition_vector[i] ); 
+        
+        // now figure out finer-grained controls 
+        
+        node1 = node.child( "Dirichlet_options" );
+        if( node1 )
+        {
+            // xmin, xmax, ymin, ymax, zmin, zmax, interior 
+            pugi::xml_node node2 = node1.child("boundary_value"); 
+            
+            while( node2 )
+            {
+                // which boundary? 
+                std::string boundary_ID = node2.attribute("ID").value(); 
+                
+                // xmin 
+                if( std::strstr( boundary_ID.c_str() , "xmin" ) )
+                {
+                    // on or off 
+                    Dirichlet_xmin[i] = node2.attribute("enabled").as_bool();
+                    // if there is at least one off bondary here, "all" is false for this substrate 
+                    if( node2.attribute("enabled").as_bool() == false )
+                    { Dirichlet_all[i] = false; }
+                    
+                    // which value 
+                    { Dirichlet_xmin_values[i] = PhysiCell::xml_get_my_double_value( node2 ); }
+                }
+                
+                // xmax 
+                if( std::strstr( boundary_ID.c_str() , "xmax" ) )
+                {
+                    // on or off 
+                    Dirichlet_xmax[i] = node2.attribute("enabled").as_bool();
+                    // if there is at least one off bondary here, "all" is false for this substrate 
+                    if( node2.attribute("enabled").as_bool() == false )
+                    { Dirichlet_all[i] = false; }
+                
+                    // which value 
+                    { Dirichlet_xmax_values[i] = PhysiCell::xml_get_my_double_value( node2 ); }
+                }
+                
+                // ymin 
+                if( std::strstr( boundary_ID.c_str() , "ymin" ) )
+                {
+                    // on or off 
+                    Dirichlet_ymin[i] = node2.attribute("enabled").as_bool();
+                    // if there is at least one off bondary here, "all" is false for this substrate 
+                    if( node2.attribute("enabled").as_bool() == false )
+                    { Dirichlet_all[i] = false; }
+                
+                    // which value 
+                    { Dirichlet_ymin_values[i] = PhysiCell::xml_get_my_double_value( node2 ); }
+                }
+                
+                // ymax 
+                if( std::strstr( boundary_ID.c_str() , "ymax" ) )
+                {
+                    // on or off 
+                    Dirichlet_ymax[i] = node2.attribute("enabled").as_bool();
+                    // if there is at least one off bondary here, "all" is false for this substrate 
+                    if( node2.attribute("enabled").as_bool() == false )
+                    { Dirichlet_all[i] = false; }					
+                    
+                    // which value 
+                    { Dirichlet_ymax_values[i] = PhysiCell::xml_get_my_double_value( node2 ); }
+                }				
+                                
+                // zmin 
+                if( std::strstr( boundary_ID.c_str() , "zmin" ) )
+                {
+                    // on or off 
+                    Dirichlet_zmin[i] = node2.attribute("enabled").as_bool();
+                    // if there is at least one off bondary here, "all" is false for this substrate 
+                    if( node2.attribute("enabled").as_bool() == false )
+                    { Dirichlet_all[i] = false; }
+                
+                    // which value 
+                    { Dirichlet_zmin_values[i] = PhysiCell::xml_get_my_double_value( node2 ); }
+                }
+                
+                // zmax 
+                if( std::strstr( boundary_ID.c_str() , "zmax" ) )
+                {
+                    // on or off 
+                    Dirichlet_zmax[i] = node2.attribute("enabled").as_bool();
+                    // if there is at least one off bondary here, "all" is false for this substrate 
+                    if( node2.attribute("enabled").as_bool() == false )
+                    { Dirichlet_all[i] = false; }
+                
+                    // which value 
+                    { Dirichlet_zmax_values[i] = PhysiCell::xml_get_my_double_value( node2 ); }
+                }
+                
+                node2 = node2.next_sibling("boundary_value"); 
+            }
+        }
+        
+        
+        // move on to the next variable (if any!)
+        node = node.next_sibling( "variable" ); 
+        i++; 
+    }
 
-	microenvironment_options.Dirichlet_all = Dirichlet_all; 
-	
-	microenvironment_options.Dirichlet_xmin = Dirichlet_xmin; 
-	microenvironment_options.Dirichlet_xmax = Dirichlet_xmax; 
-	microenvironment_options.Dirichlet_ymin = Dirichlet_ymin; 
-	microenvironment_options.Dirichlet_ymax = Dirichlet_ymax; 
-	microenvironment_options.Dirichlet_zmin = Dirichlet_zmin; 
-	microenvironment_options.Dirichlet_zmax = Dirichlet_zmax; 
-	
-	microenvironment_options.Dirichlet_xmin_values = Dirichlet_xmin_values; 
-	microenvironment_options.Dirichlet_xmax_values = Dirichlet_xmax_values; 
-	microenvironment_options.Dirichlet_ymin_values = Dirichlet_ymin_values; 
-	microenvironment_options.Dirichlet_ymax_values = Dirichlet_ymax_values; 
-	microenvironment_options.Dirichlet_zmin_values = Dirichlet_zmin_values; 
-	microenvironment_options.Dirichlet_zmax_values = Dirichlet_zmax_values; 
+    // now that all the variables and boundary / initial conditions are defined, 
+    // make sure that BioFVM knows about them 
 
-	// because outer boundary Dirichlet conditions are defined in the XML, 
-	// make sure we don't accidentally disable them 
-	
-	microenvironment_options.outer_Dirichlet_conditions = false;
-	
-	// if *any* of the substrates have outer Dirichlet conditions enables, 
-	// then set teh outer_Dirichlet_conditions = true; 
-	
-	if( activated_Dirichlet_boundary_detected ) 
-	{
-		microenvironment_options.outer_Dirichlet_conditions = true;
-	}
-	
-	std::cout << activated_Dirichlet_boundary_detected << std::endl; 
-	std::cout << "dc? " << microenvironment_options.outer_Dirichlet_conditions << std::endl; 
-	
-	// now, get the options 
-	node = PhysiCell::xml_find_node( root_node , "microenvironment_setup" );
-	node = PhysiCell::xml_find_node( node , "options" ); 
-	
-	// calculate gradients? 
-	microenvironment_options.calculate_gradients = PhysiCell::xml_get_bool_value( node, "calculate_gradients" ); 
-	
-	// track internalized substrates in each agent? 
-	microenvironment_options.track_internalized_substrates_in_each_agent 
-		= PhysiCell::xml_get_bool_value( node, "track_internalized_substrates_in_each_agent" ); 
-	
-	// not yet supported : read initial conditions 
-	/*
-	// read in initial conditions from an external file 
-			<!-- not yet supported --> 
-			<initial_condition type="matlab" enabled="false">
-				<filename>./config/initial.mat</filename>
-			</initial_condition>
-	*/
-	
-	// not yet supported : read Dirichlet nodes (including boundary)
-	/*
-	// Read in Dirichlet nodes from an external file.
-	// Note that if they are defined this way, then 
-	// set 	default_microenvironment_options.outer_Dirichlet_conditions = false;
-	// so that the microenvironment initialization in BioFVM does not 
-	// also add Dirichlet nodes at the outer boundary
+    microenvironment_options.Dirichlet_condition_vector = Dirichlet_condition_vector;  
+    microenvironment_options.Dirichlet_activation_vector = Dirichlet_activation_vector;
+    microenvironment_options.initial_condition_vector = initial_condition_vector; 
 
-			<!-- not yet supported --> 
-			<dirichlet_nodes type="matlab" enabled="false">
-				<filename>./config/dirichlet.mat</filename>
-			</dirichlet_nodes>
-	*/	
-	
-	return true;  
+    microenvironment_options.Dirichlet_all = Dirichlet_all; 
+
+    microenvironment_options.Dirichlet_xmin = Dirichlet_xmin; 
+    microenvironment_options.Dirichlet_xmax = Dirichlet_xmax; 
+    microenvironment_options.Dirichlet_ymin = Dirichlet_ymin; 
+    microenvironment_options.Dirichlet_ymax = Dirichlet_ymax; 
+    microenvironment_options.Dirichlet_zmin = Dirichlet_zmin; 
+    microenvironment_options.Dirichlet_zmax = Dirichlet_zmax; 
+
+    microenvironment_options.Dirichlet_xmin_values = Dirichlet_xmin_values; 
+    microenvironment_options.Dirichlet_xmax_values = Dirichlet_xmax_values; 
+    microenvironment_options.Dirichlet_ymin_values = Dirichlet_ymin_values; 
+    microenvironment_options.Dirichlet_ymax_values = Dirichlet_ymax_values; 
+    microenvironment_options.Dirichlet_zmin_values = Dirichlet_zmin_values; 
+    microenvironment_options.Dirichlet_zmax_values = Dirichlet_zmax_values; 
+
+    // because outer boundary Dirichlet conditions are defined in the XML, 
+    // make sure we don't accidentally disable them 
+
+    microenvironment_options.outer_Dirichlet_conditions = false;
+
+    // if *any* of the substrates have outer Dirichlet conditions enables, 
+    // then set teh outer_Dirichlet_conditions = true; 
+
+    if( activated_Dirichlet_boundary_detected ) 
+    {
+        microenvironment_options.outer_Dirichlet_conditions = true;
+    }
+
+    std::cout << activated_Dirichlet_boundary_detected << std::endl; 
+    std::cout << "dc? " << microenvironment_options.outer_Dirichlet_conditions << std::endl; 
+
+    // now, get the options 
+    node = PhysiCell::xml_find_node( root_node , "microenvironment_setup" );
+    node = PhysiCell::xml_find_node( node , "options" ); 
+
+    // calculate gradients? 
+    microenvironment_options.calculate_gradients = PhysiCell::xml_get_bool_value( node, "calculate_gradients" ); 
+
+    // track internalized substrates in each agent? 
+    microenvironment_options.track_internalized_substrates_in_each_agent 
+        = PhysiCell::xml_get_bool_value( node, "track_internalized_substrates_in_each_agent" ); 
+
+    // not yet supported : read initial conditions 
+    /*
+    // read in initial conditions from an external file 
+            <!-- not yet supported --> 
+            <initial_condition type="matlab" enabled="false">
+                <filename>./config/initial.mat</filename>
+            </initial_condition>
+    */
+
+    // not yet supported : read Dirichlet nodes (including boundary)
+    /*
+    // Read in Dirichlet nodes from an external file.
+    // Note that if they are defined this way, then 
+    // set 	default_microenvironment_options.outer_Dirichlet_conditions = false;
+    // so that the microenvironment initialization in BioFVM does not 
+    // also add Dirichlet nodes at the outer boundary
+
+            <!-- not yet supported --> 
+            <dirichlet_nodes type="matlab" enabled="false">
+                <filename>./config/dirichlet.mat</filename>
+            </dirichlet_nodes>
+    */	
+
+    
+    node = PhysiCell::xml_find_node( root_node , "domain" );
+
+    double xmin = PhysiCell::xml_get_double_value( node , "x_min" );
+    double xmax = PhysiCell::xml_get_double_value( node , "x_max" );
+    double ymin = PhysiCell::xml_get_double_value( node , "y_min" );
+    double ymax = PhysiCell::xml_get_double_value( node , "y_max" );
+    double zmin = PhysiCell::xml_get_double_value( node , "z_min" );
+    double zmax = PhysiCell::xml_get_double_value( node , "z_max" );
+    double dx = PhysiCell::xml_get_double_value( node, "dx" ); 
+    double dy = PhysiCell::xml_get_double_value( node, "dy" ); 
+    double dz = PhysiCell::xml_get_double_value( node, "dz" ); 
+
+    microenvironment_options.simulate_2D = PhysiCell::xml_get_bool_value( node, "use_2D" ); 
+
+    if( microenvironment_options.simulate_2D == true )
+    {
+        zmin = -0.5 * dz; 
+        zmax = 0.5 * dz; 
+    }			
+    microenvironment_options.X_range = {xmin, xmax}; 
+    microenvironment_options.Y_range = {ymin, ymax}; 
+    microenvironment_options.Z_range = {zmin, zmax}; 
+
+    microenvironment_options.dx = dx; 
+    microenvironment_options.dy = dy; 
+    microenvironment_options.dz = dz;
+
+
+    return true;  
 };
 
 void Microenvironment_py::setup_microenvironment_from_file( std::string filename )

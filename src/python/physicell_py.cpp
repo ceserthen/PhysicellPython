@@ -36,7 +36,7 @@
 #############################################################################
 */
 
-//#include "../../../pybind11/include/pybind11/pybind11.h"
+#include "../../pybind11/include/pybind11/pybind11.h"
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
 #include <pybind11/stl.h>
@@ -50,6 +50,7 @@
 #include <vector> 
 
 #include "BioFVM/biofvm_py.h"
+#include "../physicellcore/PhysiCell_cell.h"
 
 namespace py = pybind11;
 
@@ -65,7 +66,7 @@ PYBIND11_MAKE_OPAQUE(std::vector<std::vector<double>>);
 
 PYBIND11_MODULE(physicell, p) 
 {
-    
+//BioFVM Modules
     py::module_ m  = p.def_submodule("BioFVM", "BioFVM submodule of Physicell"); 
     
     py::bind_vector<std::vector<double>>(m, "VectorDouble");
@@ -75,8 +76,8 @@ PYBIND11_MODULE(physicell, p)
     //py::bind_vector<std::vector<std::vector<double>>>(m, "VectorVectorDouble");
     
     
-    //Microenvironment class
-    py::class_<BioFVM::Microenvironment>(m, "Microenvironment")
+//Microenvironment class
+    py::class_<BioFVM::Microenvironment>(m, "Microenvironmentleg")
         //constructors
         .def(py::init<std::string>())
         .def(py::init<>())
@@ -121,20 +122,23 @@ PYBIND11_MODULE(physicell, p)
         
         //simulation methods
         .def("simulate_diffusion_decay", static_cast<void (BioFVM::Microenvironment::*)(double)>(&BioFVM::Microenvironment::simulate_diffusion_decay), "advance the diffusion-decay solver by dt time");
-    
-    //Microenvironment_py Class
-    py::class_<BioFVM_py::Microenvironment_py, BioFVM::Microenvironment>(m, "Microenvironmentpy")
+   
+        
+        
+        
+//Microenvironment_py Class
+    py::class_<BioFVM_py::Microenvironment_py, BioFVM::Microenvironment>(m, "Microenvironment")
     //constructors    
         .def(py::init<>())
-        .def(py::init<BioFVM::Microenvironment_Options>())
-        .def(py::init<std::string>())
-        .def(py::init<pugi::xml_node>())
+        .def(py::init<BioFVM::Microenvironment_Options>(), py::arg("Microenvironment_Options"))
+        .def(py::init<std::string>(), py::arg("xml_config_file"))
+        .def(py::init<pugi::xml_node>(), py::arg("xml_node"))
     
     //XML readers
         
-        .def("setup_microenvironment_from_file", static_cast<void (BioFVM_py::Microenvironment_py::*)(std::string)>(&BioFVM_py::Microenvironment_py::setup_microenvironment_from_file), "Load microenvironment settings from an XML node ")
+        .def("setup_microenvironment_from_file", static_cast<void (BioFVM_py::Microenvironment_py::*)(std::string)>(&BioFVM_py::Microenvironment_py::setup_microenvironment_from_file), "Load microenvironment settings from an XML file ", py::arg("xml_config_file"))
         
-        .def("setup_microenvironment_from_XML_node", static_cast<bool (BioFVM_py::Microenvironment_py::*)(pugi::xml_node)>(&BioFVM_py::Microenvironment_py::setup_microenvironment_from_XML_node), "Load microenvironment settings from an XML node ")
+        .def("setup_microenvironment_from_XML_node", static_cast<bool (BioFVM_py::Microenvironment_py::*)(pugi::xml_node)>(&BioFVM_py::Microenvironment_py::setup_microenvironment_from_XML_node), "Load microenvironment settings from an XML node ", py::arg("xml_node"))
         
         .def("initialize_microenvironment", static_cast<void (BioFVM_py::Microenvironment_py::*)( void)>(&BioFVM_py::Microenvironment_py::initialize_microenvironment), "initialize microenvironment from preloaded xml configuration")
         
@@ -148,7 +152,64 @@ PYBIND11_MODULE(physicell, p)
         
         .def("set_density", static_cast<void (BioFVM_py::Microenvironment_py::*)( int, std::string, std::string)>(&BioFVM_py::Microenvironment_py::set_density), "set_density")
         .def("set_density", static_cast<void (BioFVM_py::Microenvironment_py::*)( int, std::string, std::string, double, double)>(&BioFVM_py::Microenvironment_py::set_density), "set_density")
+        
+        ;
+        
+        
+//Core Modules
+        py::module_ pcore  = p.def_submodule("core", "core modules for physicell"); 
+        
+//Cell Container
+        py::class_<PhysiCell::Cell_Container>(pcore, "Cell_Container")
+        //contructors
+        .def(py::init<>())
+        
+        //attributes
+        .def_readwrite("num_divisions_in_current_step", &PhysiCell::Cell_Container::num_divisions_in_current_step)
+        .def_readwrite("num_deaths_in_current_step", &PhysiCell::Cell_Container::num_deaths_in_current_step)
+        
+        .def_readwrite("last_diffusion_time", &PhysiCell::Cell_Container::last_diffusion_time)
+        .def_readwrite("last_cell_cycle_time", &PhysiCell::Cell_Container::last_cell_cycle_time)
+        .def_readwrite("last_mechanics_time", &PhysiCell::Cell_Container::last_mechanics_time)
+        
+        //operators
+        .def("initialize", static_cast<void (PhysiCell::Cell_Container::*) (double, double, double, double, double, double, double)>(&PhysiCell::Cell_Container::initialize), "Initialize the cell container by providing the ranges", py::arg("x_start"), py::arg("x_end"), py::arg("y_start"), py::arg("y_end"), py::arg("z_start"), py::arg("z_end"), py::arg("voxel_size"))
+        
         ;
         
 
+       
+//Cell_Parameters
+        py::class_<PhysiCell::Cell_Parameters>(pcore, "Cell_Parameters")
+        //contructors
+        .def(py::init<>())
+        //attributes
+        
+        ;
+        
+        
+//Cell_Definition
+        py::class_<PhysiCell::Cell_Definition>(pcore, "Cell_Definition")
+        //contructors
+        .def(py::init<>())
+        //attributes
+        
+        ;
+        
+        
+//Cell_State
+        py::class_<PhysiCell::Cell_State>(pcore, "Cell_State")
+        //contructors
+        .def(py::init<>())
+        //attributes
+        
+        ;
+        
+//Cell  
+        py::class_<PhysiCell::Cell>(pcore, "Cell")
+        //contructors
+        .def(py::init<>())
+        //attributes
+        
+        ;
 };
