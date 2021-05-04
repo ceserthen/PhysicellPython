@@ -112,16 +112,18 @@ PYBIND11_MODULE(physicell, p)
         
         .def("auto_choose_diffusion_decay_solver", static_cast<void (BioFVM::Microenvironment::*)(void)>(&BioFVM::Microenvironment::auto_choose_diffusion_decay_solver), "auto_choose_diffusion_decay_solver")
         
-        .def("resize_voxels", static_cast<void (BioFVM::Microenvironment::*)(int)>(&BioFVM::Microenvironment::resize_voxels), "resize_voxels: enter the new number of voxels")
+        .def("resize_voxels", static_cast<void (BioFVM::Microenvironment::*)(int)>(&BioFVM::Microenvironment::resize_voxels), "resize_voxels: enter the new number of voxels", py::arg("new_number_of_voxels"))
         
-        .def("resize_space", static_cast<void (BioFVM::Microenvironment::*)(int, int, int)>(&BioFVM::Microenvironment::resize_space), "resize_space")
-        .def("resize_space", static_cast<void (BioFVM::Microenvironment::*)(double, double, double, double, double, double, int, int, int)>(&BioFVM::Microenvironment::resize_space), "resize_space")
-        .def("resize_space", static_cast<void (BioFVM::Microenvironment::*)(double,double,double,double,double,double,double,double,double)> (&BioFVM::Microenvironment::resize_space), "resize_space")
+        .def("resize_space", static_cast<void (BioFVM::Microenvironment::*)(int, int, int)>(&BioFVM::Microenvironment::resize_space), "resize_space", py::arg("x_nodes"), py::arg("y_nodes"), py::arg("z_nodes"))
+        .def("resize_space", static_cast<void (BioFVM::Microenvironment::*)(double,double,double,double,double,double,int,int,int)> (&BioFVM::Microenvironment::resize_space), "resize_space", py::arg("x_start"), py::arg("x_end"), py::arg("y_start"), py::arg("y_end"), py::arg("z_start"), py::arg("z_end"), py::arg("x_nodes"), py::arg("y_nodes"), py::arg("z_nodes"))
+        .def("resize_space", static_cast<void (BioFVM::Microenvironment::*)(double,double,double,double,double,double,double,double,double)> (&BioFVM::Microenvironment::resize_space), "resize_space", py::arg("x_start"), py::arg("x_end"), py::arg("y_start"), py::arg("y_end"), py::arg("z_start"), py::arg("z_end"), py::arg("dx_new"), py::arg("dy_new"), py::arg("dz_new"))
         
-        .def("resize_space_uniform", static_cast<void (BioFVM::Microenvironment::*)(double,double,double,double,double,double,double)> (&BioFVM::Microenvironment::resize_space_uniform), "resize_space_uniform")
+        .def("resize_space_uniform", static_cast<void (BioFVM::Microenvironment::*)(double,double,double,double,double,double,double)> (&BioFVM::Microenvironment::resize_space_uniform), "resize_space_uniform", py::arg("x_start"), py::arg("x_end"), py::arg("y_start"), py::arg("y_end"), py::arg("z_start"), py::arg("z_end"), py::arg("dx_new"))
         
         //simulation methods
-        .def("simulate_diffusion_decay", static_cast<void (BioFVM::Microenvironment::*)(double)>(&BioFVM::Microenvironment::simulate_diffusion_decay), "advance the diffusion-decay solver by dt time");
+        .def("simulate_diffusion_decay", static_cast<void (BioFVM::Microenvironment::*)(double)>(&BioFVM::Microenvironment::simulate_diffusion_decay), "advance the diffusion-decay solver by dt time", py::arg("dt"))
+        
+        ;
    
         
         
@@ -147,11 +149,11 @@ PYBIND11_MODULE(physicell, p)
         .def("resize_densities", static_cast<void (BioFVM_py::Microenvironment_py::*)( int)>(&BioFVM_py::Microenvironment_py::resize_densities), "resize_densities")
         
         .def("add_density", static_cast<void (BioFVM_py::Microenvironment_py::*)( void)>(&BioFVM_py::Microenvironment_py::add_density), "add_density")
-        .def("add_density", static_cast<void (BioFVM_py::Microenvironment_py::*)( std::string, std::string)>(&BioFVM_py::Microenvironment_py::add_density), "add_density")
-        .def("add_density", static_cast<void (BioFVM_py::Microenvironment_py::*)( std::string, std::string, double, double)>(&BioFVM_py::Microenvironment_py::add_density), "add_density")
+        .def("add_density", static_cast<void (BioFVM_py::Microenvironment_py::*)( std::string, std::string)>(&BioFVM_py::Microenvironment_py::add_density), "add_density", py::arg("name"), py::arg("units"))
+        .def("add_density", static_cast<void (BioFVM_py::Microenvironment_py::*)( std::string, std::string, double, double)>(&BioFVM_py::Microenvironment_py::add_density), "add_density", py::arg("name"), py::arg("units"), py::arg("diffusion_constant"), py::arg("decay_rate"))
         
-        .def("set_density", static_cast<void (BioFVM_py::Microenvironment_py::*)( int, std::string, std::string)>(&BioFVM_py::Microenvironment_py::set_density), "set_density")
-        .def("set_density", static_cast<void (BioFVM_py::Microenvironment_py::*)( int, std::string, std::string, double, double)>(&BioFVM_py::Microenvironment_py::set_density), "set_density")
+        .def("set_density", static_cast<void (BioFVM_py::Microenvironment_py::*)( int, std::string, std::string)>(&BioFVM_py::Microenvironment_py::set_density), "set_density", py::arg("index"), py::arg("name"), py::arg("units"))
+        .def("set_density", static_cast<void (BioFVM_py::Microenvironment_py::*)( int, std::string, std::string, double, double)>(&BioFVM_py::Microenvironment_py::set_density), "set_density", py::arg("index"), py::arg("name"), py::arg("units"), py::arg("diffusion_constant"), py::arg("decay_rate"))
         
         ;
         
@@ -161,21 +163,47 @@ PYBIND11_MODULE(physicell, p)
         
 //Cell Container
         py::class_<PhysiCell::Cell_Container>(pcore, "Cell_Container")
-        //contructors
-        .def(py::init<>())
+            //contructors
+            .def(py::init<>())
+            
+            //attributes
+            .def_readwrite("num_divisions_in_current_step", &PhysiCell::Cell_Container::num_divisions_in_current_step)
+            .def_readwrite("num_deaths_in_current_step", &PhysiCell::Cell_Container::num_deaths_in_current_step)
+            
+            .def_readwrite("last_diffusion_time", &PhysiCell::Cell_Container::last_diffusion_time)
+            .def_readwrite("last_cell_cycle_time", &PhysiCell::Cell_Container::last_cell_cycle_time)
+            .def_readwrite("last_mechanics_time", &PhysiCell::Cell_Container::last_mechanics_time)
+            
+            //operators
+            .def("initialize", static_cast<void (PhysiCell::Cell_Container::*) (double, double, double, double, double, double, double)>(&PhysiCell::Cell_Container::initialize), "Initialize the cell container by providing the ranges", py::arg("x_start"), py::arg("x_end"), py::arg("y_start"), py::arg("y_end"), py::arg("z_start"), py::arg("z_end"), py::arg("voxel_size"))
+            
+            .def("initialize", static_cast<void (PhysiCell::Cell_Container::*) (double, double, double, double, double, double, double, double, double)>(&PhysiCell::Cell_Container::initialize), "Initialize the cell container by providing the ranges", py::arg("x_start"), py::arg("x_end"), py::arg("y_start"), py::arg("y_end"), py::arg("z_start"), py::arg("z_end"), py::arg("dx"), py::arg("dy"), py::arg("dz"))
+            
+            .def("update_all_cells", static_cast<void (PhysiCell::Cell_Container::*) (double)>(&PhysiCell::Cell_Container::update_all_cells), "Update all cells", py::arg("t"))
+            .def("update_all_cells", static_cast<void (PhysiCell::Cell_Container::*) (double, double)>(&PhysiCell::Cell_Container::update_all_cells), "Update all cells", py::arg("t"), py::arg("dt"))
+            .def("update_all_cells", static_cast<void (PhysiCell::Cell_Container::*) (double, double, double)>(&PhysiCell::Cell_Container::update_all_cells), "Update all cells", py::arg("t"), py::arg("phenotype_dt"), py::arg("mechanics_dt"))
+            .def("update_all_cells", static_cast<void (PhysiCell::Cell_Container::*) (double, double, double, double)>(&PhysiCell::Cell_Container::update_all_cells), "Update all cells", py::arg("t"), py::arg("phenotype_dt"), py::arg("mechanics_dt"), py::arg("diffusion_dt"))
+            
+            .def("register_agent", static_cast<void (PhysiCell::Cell_Container::*) (PhysiCell::Cell*)> (&PhysiCell::Cell_Container::register_agent), "register an agent", py::arg("agent"))
+            
+            .def("add_agent_to_outer_voxel", static_cast<void (PhysiCell::Cell_Container::*) (PhysiCell::Cell*)> (&PhysiCell::Cell_Container::add_agent_to_outer_voxel), "add an agent to an outer voxel", py::arg("agent"))
+            
+            .def("remove_agent", static_cast<void (PhysiCell::Cell_Container::*) (PhysiCell::Cell*)> (&PhysiCell::Cell_Container::remove_agent), "remove an agent", py::arg("agent"))
+            
+            .def("remove_agent_from_voxel", static_cast<void (PhysiCell::Cell_Container::*) (PhysiCell::Cell*, int)> (&PhysiCell::Cell_Container::remove_agent_from_voxel), "remove an agent from a voxel", py::arg("agent"), py::arg("voxel_index"))
         
-        //attributes
-        .def_readwrite("num_divisions_in_current_step", &PhysiCell::Cell_Container::num_divisions_in_current_step)
-        .def_readwrite("num_deaths_in_current_step", &PhysiCell::Cell_Container::num_deaths_in_current_step)
-        
-        .def_readwrite("last_diffusion_time", &PhysiCell::Cell_Container::last_diffusion_time)
-        .def_readwrite("last_cell_cycle_time", &PhysiCell::Cell_Container::last_cell_cycle_time)
-        .def_readwrite("last_mechanics_time", &PhysiCell::Cell_Container::last_mechanics_time)
-        
-        //operators
-        .def("initialize", static_cast<void (PhysiCell::Cell_Container::*) (double, double, double, double, double, double, double)>(&PhysiCell::Cell_Container::initialize), "Initialize the cell container by providing the ranges", py::arg("x_start"), py::arg("x_end"), py::arg("y_start"), py::arg("y_end"), py::arg("z_start"), py::arg("z_end"), py::arg("voxel_size"))
-        
-        ;
+            .def("add_agent_to_voxel", static_cast<void (PhysiCell::Cell_Container::*) (PhysiCell::Cell*, int)> (&PhysiCell::Cell_Container::add_agent_to_voxel), "add an agent to a voxel", py::arg("agent"), py::arg("voxel_index"))
+            
+            .def("flag_cell_for_division", static_cast<void (PhysiCell::Cell_Container::*) (PhysiCell::Cell*)> (&PhysiCell::Cell_Container::flag_cell_for_division), "flag a cell agent for division", py::arg("agent"))
+            
+            .def("flag_cell_for_removal", static_cast<void (PhysiCell::Cell_Container::*) (PhysiCell::Cell*)> (&PhysiCell::Cell_Container::flag_cell_for_removal), "flag a cell agent for removal", py::arg("agent"))
+            
+            .def("contain_any_cell", static_cast<bool (PhysiCell::Cell_Container::*) (int)> (&PhysiCell::Cell_Container::contain_any_cell), "contain_any_cell", py::arg("voxel_index"))
+            ;
+
+        //function for creating the cell container given a microenvironment
+        pcore.def("create_cell_container_for_microenvironment", &PhysiCell::create_cell_container_for_microenvironment, py::arg("Microenvironment"), py::arg("mechanics_voxel_size"));
+
         
 
        
