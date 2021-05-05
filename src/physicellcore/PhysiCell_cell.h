@@ -236,7 +236,7 @@ class Cell : public Basic_Agent
 	
 	void convert_to_cell_definition( Cell_Definition& cd ); 
 };
-
+//DAB 05-05-21 Why are these not operators in the cell container????? (Reconstruction planned in the py module)
 Cell* create_cell( void );  
 Cell* create_cell( Cell_Definition& cd );  
 
