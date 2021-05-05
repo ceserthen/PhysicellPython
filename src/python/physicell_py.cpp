@@ -69,6 +69,17 @@ using CellList = std::vector<PhysiCell::Cell*, std::allocator<PhysiCell::Cell*>>
 PYBIND11_MAKE_OPAQUE(std::vector<std::vector<PhysiCell::Cell*>>);
 
 
+PYBIND11_MAKE_OPAQUE(std::vector<PhysiCell::Cycle_Model*, std::allocator<PhysiCell::Cycle_Model*>>);
+using CycleModelList = std::vector<PhysiCell::Cycle_Model*, std::allocator<PhysiCell::Cycle_Model*>>;
+
+PYBIND11_MAKE_OPAQUE(std::vector<PhysiCell::Death_Parameters*, std::allocator<PhysiCell::Death_Parameters*>>);
+using DeathParametersList = std::vector<PhysiCell::Death_Parameters*, std::allocator<PhysiCell::Death_Parameters*>>;
+
+PYBIND11_MAKE_OPAQUE(std::vector<PhysiCell::Phase, std::allocator<PhysiCell::Phase>>);
+using PhaseList = std::vector<PhysiCell::Phase, std::allocator<PhysiCell::Phase>>;
+
+PYBIND11_MAKE_OPAQUE(std::vector< std::vector<PhysiCell::Phase_Link>>);
+
 PYBIND11_MODULE(physicell, p) 
 {
 //BioFVM Modules
@@ -239,145 +250,497 @@ PYBIND11_MODULE(physicell, p)
         
 //Cell_Definition
         py::class_<PhysiCell::Cell_Definition>(pcore, "Cell_Definition")
-        //contructors
-        .def(py::init<>())
-        //.def(py::init<PhysiCell::Cell_Definition&)>()
-        
-        //operatos
-        //.def(py::self = py::self)
-        
-        //attributes
-        .def_readwrite("type", &PhysiCell::Cell_Definition::type)
-        .def_readwrite("name", &PhysiCell::Cell_Definition::name)
-        
-        .def_readwrite("pMicroenvironment", &PhysiCell::Cell_Definition::pMicroenvironment)
-        
-        .def_readwrite("parameters", &PhysiCell::Cell_Definition::parameters)
-        .def_readwrite("custom_data", &PhysiCell::Cell_Definition::custom_data)
-        .def_readwrite("functions", &PhysiCell::Cell_Definition::functions)
-        .def_readwrite("phenotype", &PhysiCell::Cell_Definition::phenotype)
+            //contructors
+            .def(py::init<>())
+            //.def(py::init<PhysiCell::Cell_Definition&)>()
+            
+            //operatos
+            //.def(py::self = py::self)
+            
+            //attributes
+            .def_readwrite("type", &PhysiCell::Cell_Definition::type)
+            .def_readwrite("name", &PhysiCell::Cell_Definition::name)
+            
+            .def_readwrite("pMicroenvironment", &PhysiCell::Cell_Definition::pMicroenvironment)
+            
+            .def_readwrite("parameters", &PhysiCell::Cell_Definition::parameters)
+            .def_readwrite("custom_data", &PhysiCell::Cell_Definition::custom_data)
+            .def_readwrite("functions", &PhysiCell::Cell_Definition::functions)
+            .def_readwrite("phenotype", &PhysiCell::Cell_Definition::phenotype)
+            ;
+            
+            
+    //Cell_State
+            py::class_<PhysiCell::Cell_State>(pcore, "Cell_State")
+            //contructors
+            .def(py::init<>())
+            //attributes
+            .def_readwrite("attached_cells", &PhysiCell::Cell_State::attached_cells)
+            
+            .def_readwrite("neighbors", &PhysiCell::Cell_State::neighbors)
+            .def_readwrite("orientation", &PhysiCell::Cell_State::orientation)
+            
+            .def_readwrite("simple_pressure", &PhysiCell::Cell_State::simple_pressure)
+            
+            .def("number_of_attached_cells", static_cast<int (PhysiCell::Cell_State::*) (void)> (&PhysiCell::Cell_State::number_of_attached_cells), "Return the number of attached cells")
+            ;
+            
+    //Cell  
+            py::class_<PhysiCell::Cell>(pcore, "Cell")
+            //contructors
+            .def(py::init<>())
+            //attributes
+            .def_readwrite("type_name", &PhysiCell::Cell::type_name)
+            
+            .def_readwrite("custom_data", &PhysiCell::Cell::custom_data)
+            .def_readwrite("parameters", &PhysiCell::Cell::parameters)
+            .def_readwrite("functions", &PhysiCell::Cell::functions)
+            
+            .def_readwrite("state", &PhysiCell::Cell::state)
+            .def_readwrite("phenotype", &PhysiCell::Cell::phenotype)
+            
+            .def_readwrite("is_out_of_domain", &PhysiCell::Cell::is_out_of_domain)
+            .def_readwrite("is_movable", &PhysiCell::Cell::is_movable)
+            
+            .def_readwrite("displacement", &PhysiCell::Cell::displacement)
+            
+            //operators
+            .def("update_motility_vector", static_cast<void (PhysiCell::Cell::*) (double)> (&PhysiCell::Cell::update_motility_vector), "update the motility vector", py::arg("dt"))
+            
+            .def("advance_bundled_phenotype_functions", static_cast<void (PhysiCell::Cell::*) (double)> (&PhysiCell::Cell::advance_bundled_phenotype_functions), "advance bundled phenotype functions", py::arg("dt"))
+            
+            
+            .def("add_potentials", static_cast<void (PhysiCell::Cell::*) (PhysiCell::Cell*)> (&PhysiCell::Cell::add_potentials), "add potentails")
+            
+            .def("set_previous_velocity", static_cast<void (PhysiCell::Cell::*) (double, double, double)> (&PhysiCell::Cell::set_previous_velocity), "set_previous_velocity", py::arg("xV"), py::arg("yV"), py::arg("zV"))
+            
+            .def("get_current_mechanics_voxel_index", static_cast<int (PhysiCell::Cell::*) ()> (&PhysiCell::Cell::get_current_mechanics_voxel_index), "get_current_mechanics_voxel_index")
+            
+            .def("turn_off_reactions", static_cast<void (PhysiCell::Cell::*) (double)> (&PhysiCell::Cell::turn_off_reactions), "turn_off_reactions")
+            
+            
+            .def("flag_for_division", static_cast<void (PhysiCell::Cell::*) (void)> (&PhysiCell::Cell::flag_for_division), "flag_for_division")
+            
+            .def("flag_for_removal", static_cast<void (PhysiCell::Cell::*) (void)> (&PhysiCell::Cell::flag_for_removal), "flag_for_removal")
+            
+            
+            .def("start_death", static_cast<void (PhysiCell::Cell::*) (int)> (&PhysiCell::Cell::start_death), "start death given a ceartain death model", py::arg("death_model_index"))
+            
+            .def("lyse_cell", static_cast<void (PhysiCell::Cell::*) (void)> (&PhysiCell::Cell::lyse_cell))
+            
+            
+            .def("divide", static_cast<PhysiCell::Cell* (PhysiCell::Cell::*) (void)> (&PhysiCell::Cell::divide), "divide the cell into a new cell")
+            
+            .def("die", static_cast<void (PhysiCell::Cell::*) (void)> (&PhysiCell::Cell::die), "the cells dies")
+            
+            .def("step", static_cast<void (PhysiCell::Cell::*) (double)> (&PhysiCell::Cell::step), "step the cell", py::arg("dt"))
+            
+            
+            .def("assign_position", static_cast<bool (PhysiCell::Cell::*) (std::vector<double>)> (&PhysiCell::Cell::assign_position), "assign_position")
+            
+            .def("assign_position", static_cast<bool (PhysiCell::Cell::*) (double, double, double)> (&PhysiCell::Cell::assign_position), "assign_position")
+            
+            .def("set_total_volume", static_cast<void (PhysiCell::Cell::*) (double)> (&PhysiCell::Cell::set_total_volume), "set_total_volume")
+            
+            
+            .def("get_total_volume", static_cast<double& (PhysiCell::Cell::*) (void)> (&PhysiCell::Cell::get_total_volume), "set_total_volume")
+            
+            
+            .def("set_target_volume", static_cast<void (PhysiCell::Cell::*) (double)> (&PhysiCell::Cell::set_target_volume), "set_target_volume")
+            
+            .def("set_target_radius", static_cast<void (PhysiCell::Cell::*) (double)> (&PhysiCell::Cell::set_target_radius), "set_target_radius")
+            
+            .def("set_radius", static_cast<void (PhysiCell::Cell::*) (double)> (&PhysiCell::Cell::set_radius), "set_radius")
+            
+            
+            .def("update_position", static_cast<void (PhysiCell::Cell::*) (double)> (&PhysiCell::Cell::update_position), "update_position", py::arg("dt"))
+            
+            
+            .def("copy_function_pointers", static_cast<void (PhysiCell::Cell::*) (PhysiCell::Cell*)> (&PhysiCell::Cell::copy_function_pointers), "copy_function_pointers")
+            
+            
+            .def("assign_orientation", static_cast<void (PhysiCell::Cell::*) ()> (&PhysiCell::Cell::assign_orientation), "assign_orientation")
+            
+            
+            .def("update_voxel_in_container", static_cast<void (PhysiCell::Cell::*) (void)> (&PhysiCell::Cell::update_voxel_in_container), "update_voxel_in_container")
+            
+            .def("copy_data", static_cast<void (PhysiCell::Cell::*) (PhysiCell::Cell*)> (&PhysiCell::Cell::copy_data), "copy_data")
+            
+            
+            .def("ingest_cell", static_cast<void (PhysiCell::Cell::*) (PhysiCell::Cell*)> (&PhysiCell::Cell::ingest_cell), "ingest_cell")
+            
+            .def("attach_cell", static_cast<void (PhysiCell::Cell::*) (PhysiCell::Cell*)> (&PhysiCell::Cell::attach_cell), "attach_cell")
+            
+            .def("detach_cell", static_cast<void (PhysiCell::Cell::*) (PhysiCell::Cell*)> (&PhysiCell::Cell::detach_cell), "detach_cell")
+            
+            .def("remove_all_attached_cells", static_cast<void (PhysiCell::Cell::*) (void)> (&PhysiCell::Cell::remove_all_attached_cells), "remove_all_attached_cells")
+            
+            
+            .def("set_phenotype", static_cast<void (PhysiCell::Cell::*) (PhysiCell::Phenotype&)> (&PhysiCell::Cell::set_phenotype), "set_phenotype")
+            
+            .def("update_radius", static_cast<void (PhysiCell::Cell::*) ()> (&PhysiCell::Cell::update_radius), "update_radius")
+            
+            .def("get_container", static_cast<PhysiCell::Cell_Container* (PhysiCell::Cell::*) ()> (&PhysiCell::Cell::get_container), "get_container")
+            
+            .def("cells_in_my_container", static_cast<std::vector<PhysiCell::Cell*>& (PhysiCell::Cell::*) (void)> (&PhysiCell::Cell::cells_in_my_container), "cells_in_my_container")
+            
+            .def("nearby_cells", static_cast<std::vector<PhysiCell::Cell*> (PhysiCell::Cell::*) (void)> (&PhysiCell::Cell::nearby_cells), "nearby_cells")
+            
+            .def("nearby_interacting_cells", static_cast<std::vector<PhysiCell::Cell*> (PhysiCell::Cell::*) ( void)> (&PhysiCell::Cell::nearby_interacting_cells), "nearby_interacting_cells")
+            
+            .def("convert_to_cell_definition", static_cast<void (PhysiCell::Cell::*) ( PhysiCell::Cell_Definition&)> (&PhysiCell::Cell::convert_to_cell_definition), "convert_to_cell_definition")
+            
         ;
         
         
-//Cell_State
-        py::class_<PhysiCell::Cell_State>(pcore, "Cell_State")
-        //contructors
+    //Phase
+    py::class_<PhysiCell::Phase>(pcore, "Phase")
+        //constructor
         .def(py::init<>())
+        
         //attributes
-        .def_readwrite("attached_cells", &PhysiCell::Cell_State::attached_cells)
+        .def_readwrite("index", &PhysiCell::Phase::index)
+        .def_readwrite("code", &PhysiCell::Phase::code)
+        .def_readwrite("name", &PhysiCell::Phase::name)
+        .def_readwrite("division_at_phase_exit", &PhysiCell::Phase::division_at_phase_exit)
+        .def_readwrite("removal_at_phase_exit", &PhysiCell::Phase::removal_at_phase_exit)
+        //TODO: Entry Function
         
-        .def_readwrite("neighbors", &PhysiCell::Cell_State::neighbors)
-        .def_readwrite("orientation", &PhysiCell::Cell_State::orientation)
-        
-        .def_readwrite("simple_pressure", &PhysiCell::Cell_State::simple_pressure)
-        
-        .def("number_of_attached_cells", static_cast<int (PhysiCell::Cell_State::*) (void)> (&PhysiCell::Cell_State::number_of_attached_cells), "Return the number of attached cells")
         ;
         
-//Cell  
-        py::class_<PhysiCell::Cell>(pcore, "Cell")
-        //contructors
+    //Phase_link
+    py::class_<PhysiCell::Phase_Link>(pcore, "Phase_Link")
+        //constructor
         .def(py::init<>())
+        
         //attributes
-        .def_readwrite("type_name", &PhysiCell::Cell::type_name)
+        .def_readwrite("start_phase_index", &PhysiCell::Phase_Link::start_phase_index)    
+        .def_readwrite("end_phase_index", &PhysiCell::Phase_Link::end_phase_index)  
+        .def_readwrite("fixed_duration", &PhysiCell::Phase_Link::fixed_duration)  
         
-        .def_readwrite("custom_data", &PhysiCell::Cell::custom_data)
-        .def_readwrite("parameters", &PhysiCell::Cell::parameters)
-        .def_readwrite("functions", &PhysiCell::Cell::functions)
+        ;
         
-        .def_readwrite("state", &PhysiCell::Cell::state)
-        .def_readwrite("phenotype", &PhysiCell::Cell::phenotype)
+    //Cycle_Data
+    py::class_<PhysiCell::Cycle_Data>(pcore, "Cycle_Data")
+        //constructor
+        .def(py::init<>())
         
-        .def_readwrite("is_out_of_domain", &PhysiCell::Cell::is_out_of_domain)
-        .def_readwrite("is_movable", &PhysiCell::Cell::is_movable)
-        
-        .def_readwrite("displacement", &PhysiCell::Cell::displacement)
+        //attributes
+        .def_readwrite("pCycle_Model", &PhysiCell::Cycle_Data::pCycle_Model)
+        .def_readwrite("time_units", &PhysiCell::Cycle_Data::time_units)
+        .def_readwrite("transition_rates", &PhysiCell::Cycle_Data::transition_rates)
+        .def_readwrite("current_phase_index", &PhysiCell::Cycle_Data::current_phase_index)
+        .def_readwrite("elapsed_time_in_phase", &PhysiCell::Cycle_Data::elapsed_time_in_phase)
         
         //operators
-        .def("update_motility_vector", static_cast<void (PhysiCell::Cell::*) (double)> (&PhysiCell::Cell::update_motility_vector), "update the motility vector", py::arg("dt"))
+        .def("current_phase", static_cast<PhysiCell::Phase& (PhysiCell::Cycle_Data::*) (void)> (&PhysiCell::Cycle_Data::current_phase), "current_phase")
         
-        .def("advance_bundled_phenotype_functions", static_cast<void (PhysiCell::Cell::*) (double)> (&PhysiCell::Cell::advance_bundled_phenotype_functions), "advance bundled phenotype functions", py::arg("dt"))
+        .def("sync_to_cycle_model", static_cast<void (PhysiCell::Cycle_Data::*) (void)> (&PhysiCell::Cycle_Data::sync_to_cycle_model), "sync_to_cycle_model")
         
+        .def("transition_rate", static_cast<double& (PhysiCell::Cycle_Data::*) (int,int)> (&PhysiCell::Cycle_Data::transition_rate), "transition_rate", py::arg("start_phase_index"), py::arg("end_phase_index"))
         
-        .def("add_potentials", static_cast<void (PhysiCell::Cell::*) (PhysiCell::Cell*)> (&PhysiCell::Cell::add_potentials), "add potentails")
+        .def("exit_rate", static_cast<double& (PhysiCell::Cycle_Data::*) (int)> (&PhysiCell::Cycle_Data::exit_rate), "exit_rate")
         
-        .def("set_previous_velocity", static_cast<void (PhysiCell::Cell::*) (double, double, double)> (&PhysiCell::Cell::set_previous_velocity), "set_previous_velocity", py::arg("xV"), py::arg("yV"), py::arg("zV"))
-        
-        .def("get_current_mechanics_voxel_index", static_cast<int (PhysiCell::Cell::*) ()> (&PhysiCell::Cell::get_current_mechanics_voxel_index), "get_current_mechanics_voxel_index")
-        
-        .def("turn_off_reactions", static_cast<void (PhysiCell::Cell::*) (double)> (&PhysiCell::Cell::turn_off_reactions), "turn_off_reactions")
+        ;
         
         
-        .def("flag_for_division", static_cast<void (PhysiCell::Cell::*) (void)> (&PhysiCell::Cell::flag_for_division), "flag_for_division")
+    //Cycle_Model
+    py::class_<PhysiCell::Cycle_Model>(pcore, "Cycle_Model")
+        //constructor
+        .def(py::init<>())
         
-        .def("flag_for_removal", static_cast<void (PhysiCell::Cell::*) (void)> (&PhysiCell::Cell::flag_for_removal), "flag_for_removal")
+        //attributes
+        .def_readwrite("name", &PhysiCell::Cycle_Model::name)
+        .def_readwrite("code", &PhysiCell::Cycle_Model::code)
+        .def_readwrite("phases", &PhysiCell::Cycle_Model::phases)
+        .def_readwrite("phase_links", &PhysiCell::Cycle_Model::phase_links)
+        .def_readwrite("default_phase_index", &PhysiCell::Cycle_Model::default_phase_index)
+        .def_readwrite("data", &PhysiCell::Cycle_Model::data)
         
+        //operators
+        .def("advance_model", static_cast<void (PhysiCell::Cycle_Model::*) (PhysiCell::Cell*, PhysiCell::Phenotype&, double)> (&PhysiCell::Cycle_Model::advance_model), "advance_model")
         
-        .def("start_death", static_cast<void (PhysiCell::Cell::*) (int)> (&PhysiCell::Cell::start_death), "start death given a ceartain death model", py::arg("death_model_index"))
+        .def("add_phase", static_cast<int (PhysiCell::Cycle_Model::*) (int, std::string)> (&PhysiCell::Cycle_Model::add_phase), "add_phase", py::arg("start_index"), py::arg("end_index"))
         
-        .def("lyse_cell", static_cast<void (PhysiCell::Cell::*) (void)> (&PhysiCell::Cell::lyse_cell))
+        //TODO: put together the add hase linked
         
+        .def("find_phase_index", static_cast<int (PhysiCell::Cycle_Model::*) (int)> (&PhysiCell::Cycle_Model::find_phase_index), "find_phase_index", py::arg("code"))
+        .def("find_phase_index", static_cast<int (PhysiCell::Cycle_Model::*) (std::string)> (&PhysiCell::Cycle_Model::find_phase_index), "find_phase_index", py::arg("name"))
         
-        .def("divide", static_cast<PhysiCell::Cell* (PhysiCell::Cell::*) (void)> (&PhysiCell::Cell::divide), "divide the cell into a new cell")
+         .def("transition_rate", static_cast<double& (PhysiCell::Cycle_Model::*) (int, int)> (&PhysiCell::Cycle_Model::transition_rate), "transition_rate", py::arg("start_index"), py::arg("end_index"))
+         
+         
+        .def("phase_link", static_cast<PhysiCell::Phase_Link& (PhysiCell::Cycle_Model::*) (int, int)> (&PhysiCell::Cycle_Model::phase_link), "phase_link", py::arg("start_index"), py::arg("end_index"))
         
-        .def("die", static_cast<void (PhysiCell::Cell::*) (void)> (&PhysiCell::Cell::die), "the cells dies")
+        ;
         
-        .def("step", static_cast<void (PhysiCell::Cell::*) (double)> (&PhysiCell::Cell::step), "step the cell", py::arg("dt"))
+    //Cycle
+    py::class_<PhysiCell::Cycle>(pcore, "Cycle")
+        //contructors
+        .def(py::init<>())
         
+        //attributes
+        .def_readwrite("pCycle_Model", &PhysiCell::Cycle::pCycle_Model)
+        .def_readwrite("data", &PhysiCell::Cycle::data) 
         
-        .def("assign_position", static_cast<bool (PhysiCell::Cell::*) (std::vector<double>)> (&PhysiCell::Cell::assign_position), "assign_position")
+        //operators
+        .def("advance_cycle", static_cast<void (PhysiCell::Cycle::*) (PhysiCell::Cell*, PhysiCell::Phenotype&, double)> (&PhysiCell::Cycle::advance_cycle), "advance_cycle")
         
-        .def("assign_position", static_cast<bool (PhysiCell::Cell::*) (double, double, double)> (&PhysiCell::Cell::assign_position), "assign_position")
+        .def("model", static_cast<PhysiCell::Cycle_Model& (PhysiCell::Cycle::*) (void)> (&PhysiCell::Cycle::model), "model")
         
-        .def("set_total_volume", static_cast<void (PhysiCell::Cell::*) (double)> (&PhysiCell::Cell::set_total_volume), "set_total_volume")
+        .def("current_phase", static_cast<PhysiCell::Phase& (PhysiCell::Cycle::*) (void)> (&PhysiCell::Cycle::current_phase), "current_phase")
         
-        
-        .def("get_total_volume", static_cast<double& (PhysiCell::Cell::*) (void)> (&PhysiCell::Cell::get_total_volume), "set_total_volume")
-        
-        
-        .def("set_target_volume", static_cast<void (PhysiCell::Cell::*) (double)> (&PhysiCell::Cell::set_target_volume), "set_target_volume")
-        
-        .def("set_target_radius", static_cast<void (PhysiCell::Cell::*) (double)> (&PhysiCell::Cell::set_target_radius), "set_target_radius")
-        
-        .def("set_radius", static_cast<void (PhysiCell::Cell::*) (double)> (&PhysiCell::Cell::set_radius), "set_radius")
-        
-        
-        .def("update_position", static_cast<void (PhysiCell::Cell::*) (double)> (&PhysiCell::Cell::update_position), "update_position", py::arg("dt"))
-        
-        
-        .def("copy_function_pointers", static_cast<void (PhysiCell::Cell::*) (PhysiCell::Cell*)> (&PhysiCell::Cell::copy_function_pointers), "copy_function_pointers")
-        
-        
-        .def("assign_orientation", static_cast<void (PhysiCell::Cell::*) ()> (&PhysiCell::Cell::assign_orientation), "assign_orientation")
-        
-        
-        .def("update_voxel_in_container", static_cast<void (PhysiCell::Cell::*) (void)> (&PhysiCell::Cell::update_voxel_in_container), "update_voxel_in_container")
-        
-        .def("copy_data", static_cast<void (PhysiCell::Cell::*) (PhysiCell::Cell*)> (&PhysiCell::Cell::copy_data), "copy_data")
-        
-        
-        .def("ingest_cell", static_cast<void (PhysiCell::Cell::*) (PhysiCell::Cell*)> (&PhysiCell::Cell::ingest_cell), "ingest_cell")
-        
-        .def("attach_cell", static_cast<void (PhysiCell::Cell::*) (PhysiCell::Cell*)> (&PhysiCell::Cell::attach_cell), "attach_cell")
-        
-        .def("detach_cell", static_cast<void (PhysiCell::Cell::*) (PhysiCell::Cell*)> (&PhysiCell::Cell::detach_cell), "detach_cell")
-        
-        .def("remove_all_attached_cells", static_cast<void (PhysiCell::Cell::*) (void)> (&PhysiCell::Cell::remove_all_attached_cells), "remove_all_attached_cells")
+        .def("current_phase_index", static_cast<int& (PhysiCell::Cycle::*) (void)> (&PhysiCell::Cycle::current_phase_index), "current_phase_index")
         
         
-        .def("set_phenotype", static_cast<void (PhysiCell::Cell::*) (PhysiCell::Phenotype&)> (&PhysiCell::Cell::set_phenotype), "set_phenotype")
+        .def("sync_to_cycle_model", static_cast<void (PhysiCell::Cycle::*) (PhysiCell::Cycle_Model&)> (&PhysiCell::Cycle::sync_to_cycle_model), "sync_to_cycle_model")
         
-        .def("update_radius", static_cast<void (PhysiCell::Cell::*) ()> (&PhysiCell::Cell::update_radius), "update_radius")
         
-        .def("get_container", static_cast<PhysiCell::Cell_Container* (PhysiCell::Cell::*) ()> (&PhysiCell::Cell::get_container), "get_container")
+        ;
         
-        .def("cells_in_my_container", static_cast<std::vector<PhysiCell::Cell*>& (PhysiCell::Cell::*) (void)> (&PhysiCell::Cell::cells_in_my_container), "cells_in_my_container")
+    //Death_Parameter
+    py::class_<PhysiCell::Death_Parameters>(pcore, "Death_Parameters")
+        //contructors
+        .def(py::init<>())
         
-        .def("nearby_cells", static_cast<std::vector<PhysiCell::Cell*> (PhysiCell::Cell::*) (void)> (&PhysiCell::Cell::nearby_cells), "nearby_cells")
+        //attributes
+        .def_readwrite("time_units", &PhysiCell::Death_Parameters::time_units)
+        .def_readwrite("unlysed_fluid_change_rate", &PhysiCell::Death_Parameters::unlysed_fluid_change_rate)
+        .def_readwrite("lysed_fluid_change_rate", &PhysiCell::Death_Parameters::lysed_fluid_change_rate)
+        .def_readwrite("cytoplasmic_biomass_change_rate", &PhysiCell::Death_Parameters::cytoplasmic_biomass_change_rate)
+        .def_readwrite("nuclear_biomass_change_rate", &PhysiCell::Death_Parameters::nuclear_biomass_change_rate)
+        .def_readwrite("calcification_rate", &PhysiCell::Death_Parameters::calcification_rate)
+        .def_readwrite("relative_rupture_volume", &PhysiCell::Death_Parameters::relative_rupture_volume)
+        ;
+    //Death
+    py::class_<PhysiCell::Death>(pcore, "Death")
+        //contructors
+        .def(py::init<>())
         
-        .def("nearby_interacting_cells", static_cast<std::vector<PhysiCell::Cell*> (PhysiCell::Cell::*) ( void)> (&PhysiCell::Cell::nearby_interacting_cells), "nearby_interacting_cells")
+        //attributes
+        .def_readwrite("rates", &PhysiCell::Death::rates)
+        .def_readwrite("models", &PhysiCell::Death::models)
+        .def_readwrite("parameters", &PhysiCell::Death::parameters)
         
-        .def("convert_to_cell_definition", static_cast<void (PhysiCell::Cell::*) ( PhysiCell::Cell_Definition&)> (&PhysiCell::Cell::convert_to_cell_definition), "convert_to_cell_definition")
+        .def_readwrite("dead", &PhysiCell::Death::dead)
+        .def_readwrite("current_death_model_index", &PhysiCell::Death::current_death_model_index)
         
+        //operators
+        .def("add_death_model", static_cast<int (PhysiCell::Death::*) (double, PhysiCell::Cycle_Model*)> (&PhysiCell::Death::add_death_model), "add_death_model")
+        
+        .def("add_death_model", static_cast<int (PhysiCell::Death::*) (double, PhysiCell::Cycle_Model*, PhysiCell::Death_Parameters&)> (&PhysiCell::Death::add_death_model), "add_death_model")
+        
+        .def("find_death_model_index", static_cast<int (PhysiCell::Death::*) (int)> (&PhysiCell::Death::find_death_model_index), "find_death_model_index")
+        .def("find_death_model_index", static_cast<int (PhysiCell::Death::*) (std::string)> (&PhysiCell::Death::find_death_model_index), "find_death_model_index")
+        
+        .def("check_for_death", static_cast<bool (PhysiCell::Death::*) (double)> (&PhysiCell::Death::check_for_death), "check_for_death")
+        
+        .def("trigger_death", static_cast<void (PhysiCell::Death::*) (int)> (&PhysiCell::Death::trigger_death), "trigger_death", py::arg("death_model_index"))
+        
+        
+        .def("current_model", static_cast<PhysiCell::Cycle_Model& (PhysiCell::Death::*) (void)> (&PhysiCell::Death::current_model), "current_model")
+        
+        .def("current_parameters", static_cast<PhysiCell::Death_Parameters& (PhysiCell::Death::*) (void)> (&PhysiCell::Death::current_parameters), "current_parameters")
+        
+        ;
+    //Volume
+    py::class_<PhysiCell::Volume>(pcore, "Volume")
+        //contructors
+        .def(py::init<>())
+        
+        //attributes
+        .def_readwrite("total", &PhysiCell::Volume::total)
+        .def_readwrite("solid", &PhysiCell::Volume::solid)
+        .def_readwrite("fluid", &PhysiCell::Volume::fluid)
+        .def_readwrite("fluid_fraction", &PhysiCell::Volume::fluid_fraction)
+        
+        .def_readwrite("nuclear", &PhysiCell::Volume::nuclear)
+        .def_readwrite("nuclear_fluid", &PhysiCell::Volume::nuclear_fluid)
+        .def_readwrite("nuclear_solid", &PhysiCell::Volume::nuclear_solid)
+        
+        .def_readwrite("cytoplasmic", &PhysiCell::Volume::cytoplasmic)
+        .def_readwrite("cytoplasmic_fluid", &PhysiCell::Volume::cytoplasmic_fluid)
+        .def_readwrite("cytoplasmic_solid", &PhysiCell::Volume::cytoplasmic_solid)
+        
+        .def_readwrite("calcified_fraction", &PhysiCell::Volume::calcified_fraction)
+        
+        .def_readwrite("cytoplasmic_to_nuclear_ratio", &PhysiCell::Volume::cytoplasmic_to_nuclear_ratio)
+        
+        .def_readwrite("rupture_volume", &PhysiCell::Volume::rupture_volume)
+        
+        .def_readwrite("cytoplasmic_biomass_change_rate", &PhysiCell::Volume::cytoplasmic_biomass_change_rate)
+        .def_readwrite("nuclear_biomass_change_rate", &PhysiCell::Volume::nuclear_biomass_change_rate)
+        .def_readwrite("fluid_change_rate", &PhysiCell::Volume::fluid_change_rate)
+        
+        .def_readwrite("calcification_rate", &PhysiCell::Volume::calcification_rate)
+        
+        .def_readwrite("target_solid_cytoplasmic", &PhysiCell::Volume::target_solid_cytoplasmic)
+        .def_readwrite("target_solid_nuclear", &PhysiCell::Volume::target_solid_nuclear)
+        .def_readwrite("target_fluid_fraction", &PhysiCell::Volume::target_fluid_fraction)
+        
+        .def_readwrite("target_cytoplasmic_to_nuclear_ratio", &PhysiCell::Volume::target_cytoplasmic_to_nuclear_ratio)
+        
+        .def_readwrite("relative_rupture_volume", &PhysiCell::Volume::relative_rupture_volume)
+        
+        //operators
+        .def("divide", static_cast<void (PhysiCell::Volume::*) (void)> (&PhysiCell::Volume::divide), "divide")
+        
+        .def("multiply_by_ratio", static_cast<void (PhysiCell::Volume::*) (double)> (&PhysiCell::Volume::multiply_by_ratio), "multiply_by_ratio")
+        ;     
+
+    //Geometry
+    py::class_<PhysiCell::Geometry>(pcore, "Geometry")
+        //contructors
+        .def(py::init<>())
+        
+        //attributes
+        .def_readwrite("radius", &PhysiCell::Geometry::radius)
+        .def_readwrite("nuclear_radius", &PhysiCell::Geometry::nuclear_radius)
+        .def_readwrite("surface_area", &PhysiCell::Geometry::surface_area)
+        
+        .def_readwrite("polarity", &PhysiCell::Geometry::polarity)
+        
+        //operators
+        .def("update_radius", static_cast<void (PhysiCell::Geometry::*) (PhysiCell::Cell*, PhysiCell::Phenotype&, double)> (&PhysiCell::Geometry::update_radius), "update_radius")
+        .def("update_nuclear_radius", static_cast<void (PhysiCell::Geometry::*) (PhysiCell::Cell*, PhysiCell::Phenotype&, double)> (&PhysiCell::Geometry::update_nuclear_radius), "update_nuclear_radius")
+        .def("update_surface_area", static_cast<void (PhysiCell::Geometry::*) (PhysiCell::Cell*, PhysiCell::Phenotype&, double)> (&PhysiCell::Geometry::update_surface_area), "update_surface_area")
+        
+        
+        .def("update", static_cast<void (PhysiCell::Geometry::*) (PhysiCell::Cell*, PhysiCell::Phenotype&, double)> (&PhysiCell::Geometry::update), "update")
+        ;
+        
+    //Mechanics
+    py::class_<PhysiCell::Mechanics>(pcore, "Mechanics")
+        //contructors
+        .def(py::init<>())
+        
+        //attributes
+        .def_readwrite("cell_cell_adhesion_strength", &PhysiCell::Mechanics::cell_cell_adhesion_strength)
+        .def_readwrite("cell_BM_adhesion_strength", &PhysiCell::Mechanics::cell_BM_adhesion_strength)
+        .def_readwrite("cell_cell_repulsion_strength", &PhysiCell::Mechanics::cell_cell_repulsion_strength)
+        .def_readwrite("cell_BM_repulsion_strength", &PhysiCell::Mechanics::cell_BM_repulsion_strength)
+        
+        .def_readwrite("relative_maximum_adhesion_distance", &PhysiCell::Mechanics::relative_maximum_adhesion_distance)
+        
+        .def_readwrite("relative_maximum_attachment_distance", &PhysiCell::Mechanics::relative_maximum_attachment_distance)
+        .def_readwrite("relative_detachment_distance", &PhysiCell::Mechanics::relative_detachment_distance)
+        
+        .def_readwrite("maximum_number_of_attachments", &PhysiCell::Mechanics::maximum_number_of_attachments)
+        .def_readwrite("attachment_elastic_constant", &PhysiCell::Mechanics::attachment_elastic_constant)
+        .def_readwrite("maximum_attachment_rate", &PhysiCell::Mechanics::maximum_attachment_rate)
+        
+        .def("set_relative_maximum_adhesion_distance", static_cast<void (PhysiCell::Mechanics::*) (double)> (&PhysiCell::Mechanics::set_relative_maximum_adhesion_distance), "set_relative_maximum_adhesion_distance")
+        
+        .def("set_relative_equilibrium_distance", static_cast<void (PhysiCell::Mechanics::*) (double)> (&PhysiCell::Mechanics::set_relative_equilibrium_distance), "set_relative_equilibrium_distance")
+        
+        
+        .def("set_absolute_equilibrium_distance", static_cast<void (PhysiCell::Mechanics::*) (PhysiCell::Phenotype& , double)> (&PhysiCell::Mechanics::set_absolute_equilibrium_distance), "set_absolute_equilibrium_distance")
+        
+        ;
+        
+        
+    //Motility
+    py::class_<PhysiCell::Motility>(pcore, "Motility")
+        //contructors
+        .def(py::init<>())
+        
+        //attributes
+        .def_readwrite("is_motile", &PhysiCell::Motility::is_motile)
+        .def_readwrite("persistence_time", &PhysiCell::Motility::persistence_time)
+        .def_readwrite("migration_speed", &PhysiCell::Motility::migration_speed)
+        .def_readwrite("migration_bias_direction", &PhysiCell::Motility::migration_bias_direction)
+        .def_readwrite("migration_bias", &PhysiCell::Motility::migration_bias)
+        .def_readwrite("restrict_to_2D", &PhysiCell::Motility::restrict_to_2D)
+        .def_readwrite("motility_vector", &PhysiCell::Motility::motility_vector)
+        .def_readwrite("chemotaxis_index", &PhysiCell::Motility::chemotaxis_index)
+        .def_readwrite("chemotaxis_direction", &PhysiCell::Motility::chemotaxis_direction)
+        ;
+        
+    //Secretion
+    py::class_<PhysiCell::Secretion>(pcore, "Secretion")
+        //contructors
+        .def(py::init<>())
+        
+        //attributes
+        .def_readwrite("pMicroenvironment", &PhysiCell::Secretion::pMicroenvironment)
+        
+        .def_readwrite("secretion_rates", &PhysiCell::Secretion::secretion_rates)
+        .def_readwrite("uptake_rates", &PhysiCell::Secretion::uptake_rates)
+        .def_readwrite("saturation_densities", &PhysiCell::Secretion::saturation_densities)
+        .def_readwrite("net_export_rates", &PhysiCell::Secretion::net_export_rates)
+        
+        //operators
+        .def("sync_to_current_microenvironment", static_cast<void (PhysiCell::Secretion::*) ( void)> (&PhysiCell::Secretion::sync_to_current_microenvironment), "sync_to_current_microenvironment")
+        
+        .def("sync_to_microenvironment", static_cast<void (PhysiCell::Secretion::*) ( BioFVM::Microenvironment*)> (&PhysiCell::Secretion::sync_to_microenvironment), "sync_to_microenvironment")
+        
+        .def("advance", static_cast<void (PhysiCell::Secretion::*) ( BioFVM::Basic_Agent*, PhysiCell::Phenotype&, double)> (&PhysiCell::Secretion::advance), "advance")
+        
+        .def("set_all_secretion_to_zero", static_cast<void (PhysiCell::Secretion::*) (void)> (&PhysiCell::Secretion::set_all_secretion_to_zero), "set_all_secretion_to_zero")
+        
+        .def("set_all_uptake_to_zero", static_cast<void (PhysiCell::Secretion::*) (void)> (&PhysiCell::Secretion::set_all_uptake_to_zero), "set_all_uptake_to_zero")
+        
+        .def("scale_all_secretion_by_factor", static_cast<void (PhysiCell::Secretion::*) (double)> (&PhysiCell::Secretion::scale_all_secretion_by_factor), "scale_all_secretion_by_factor")
+        
+        .def("scale_all_uptake_by_factor", static_cast<void (PhysiCell::Secretion::*) (double)> (&PhysiCell::Secretion::scale_all_uptake_by_factor), "scale_all_uptake_by_factor")
+        
+        ;
+        
+    //Cell_Functions
+    py::class_<PhysiCell::Cell_Functions>(pcore, "Molecular")
+        //contructors
+        .def(py::init<>())
+        
+        //attributes
+        .def_readwrite("cycle_model", &PhysiCell::Cell_Functions::cycle_model)
+        
+        
+        //TODO: Function pointers
+        ;
+    //Molecular
+    py::class_<PhysiCell::Molecular>(pcore, "Molecular")
+        //contructors
+        .def(py::init<>())
+        
+        //attributes
+        .def_readwrite("internalized_total_substrates", &PhysiCell::Molecular::internalized_total_substrates)
+        
+        .def_readwrite("fraction_released_at_death", &PhysiCell::Molecular::fraction_released_at_death)
+        
+        .def_readwrite("fraction_transferred_when_ingested", &PhysiCell::Molecular::fraction_transferred_when_ingested)
+        
+        //operators
+        .def("sync_to_current_microenvironment", static_cast<void (PhysiCell::Molecular::*) ( void)> (&PhysiCell::Molecular::sync_to_current_microenvironment), "sync_to_current_microenvironment")
+        
+        .def("sync_to_microenvironment", static_cast<void (PhysiCell::Molecular::*) ( BioFVM::Microenvironment*)> (&PhysiCell::Molecular::sync_to_microenvironment), "sync_to_microenvironment")
+        
+        .def("sync_to_cell", static_cast<void (PhysiCell::Molecular::*) ( BioFVM::Basic_Agent*)> (&PhysiCell::Molecular::sync_to_cell), "sync_to_cell")
+        
+        ;
+    //Phenotype
+    py::class_<PhysiCell::Phenotype>(pcore, "Phenotype")
+        //contructors
+        .def(py::init<>())
+        
+        //attributes
+        .def_readwrite("flagged_for_division", &PhysiCell::Phenotype::flagged_for_division)
+        .def_readwrite("flagged_for_removal", &PhysiCell::Phenotype::flagged_for_removal)
+        
+        .def_readwrite("cycle", &PhysiCell::Phenotype::cycle)
+        .def_readwrite("death", &PhysiCell::Phenotype::death)
+        .def_readwrite("volume", &PhysiCell::Phenotype::volume)
+        .def_readwrite("geometry", &PhysiCell::Phenotype::geometry)
+        .def_readwrite("mechanics", &PhysiCell::Phenotype::mechanics)
+        .def_readwrite("motility", &PhysiCell::Phenotype::motility)
+        .def_readwrite("secretion", &PhysiCell::Phenotype::secretion)
+        
+        .def_readwrite("molecular", &PhysiCell::Phenotype::molecular)
+        
+        //operators
+        .def("sync_to_functions", static_cast<void (PhysiCell::Phenotype::*) ( PhysiCell::Cell_Functions&)> (&PhysiCell::Phenotype::sync_to_functions), "sync_to_functions")
+        
+        .def("sync_to_microenvironment", static_cast<void (PhysiCell::Phenotype::*) ( BioFVM::Microenvironment*)> (&PhysiCell::Phenotype::sync_to_microenvironment), "sync_to_microenvironment")
+        
+        .def("sync_to_default_functions", static_cast<void (PhysiCell::Phenotype::*) ( void)> (&PhysiCell::Phenotype::sync_to_default_functions), "sync_to_default_functions")
         ;
 };
