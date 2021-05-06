@@ -55,24 +55,27 @@ public:
     void initialize(double x_start, double x_end, double y_start, double y_end, double z_start, double z_end , double voxel_size);
     void initialize(double x_start, double x_end, double y_start, double y_end, double z_start, double z_end , double dx, double dy, double dz);
     
-    void create_cell_container_for_microenvironment( BioFVM::Microenvironment& m , double mechanics_voxel_size ); //TODO
+    void create_cell_container_for_microenvironment( BioFVM::Microenvironment& m , double mechanics_voxel_size ); 
     
-    void update_all_cells(double t, double phenotype_dt_ , double mechanics_dt_ ); //TODO
-    void update_all_cells(double t, double phenotype_dt_ , double mechanics_dt_ , double diffusion_dt_ );//TODO
+    void update_all_cells(double t, double phenotype_dt_ , double mechanics_dt_ ); 
+    void update_all_cells(double t, double phenotype_dt_ , double mechanics_dt_ , double diffusion_dt_ );
     
     // making the create and save cell functions part of the 
-    PhysiCell::Cell* create_cell( void );//TODO Find Problems with rest of system
-    PhysiCell::Cell* create_cell( PhysiCell::Cell_Definition& cd );//TODO
+    PhysiCell::Cell* create_cell( void );
+    PhysiCell::Cell* create_cell( PhysiCell::Cell_Definition& cd );
+    //need to add a die and divide function to compliment performance
+    void delete_cell( int index );
+    void delete_cell(PhysiCell::Cell* pDelete); 
     
-    void delete_cell( int index );//TODO
-    void delete_cell( PhysiCell::Cell* ); //TODO
+    void kill_cell(PhysiCell::Cell* pDelete);
+    PhysiCell::Cell* divide_cell(PhysiCell::Cell* pDivide);
     
     void save_all_cells_to_matlab( std::string filename ); //TODO
-    void delete_cell_original( int index ); //TODO
+    void delete_cell_original( int index ); 
     
 };
 
-void add_PhysiCell_cells_to_open_xml_pugi_py( pugi::xml_document& xml_dom, std::string filename_base, Microenvironment& M, Cell_Container_py& CellCon  );//TODO
+void add_PhysiCell_cells_to_open_xml_pugi_py( pugi::xml_document& xml_dom, std::string filename_base, Microenvironment& M, Cell_Container_py& CellCon  );
 
 void save_PhysiCell_to_MultiCellDS_xml_pugi_py( std::string filename_base , Microenvironment& M , Cell_Container_py& CellCon, double current_simulation_time);
 

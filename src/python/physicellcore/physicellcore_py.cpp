@@ -60,7 +60,7 @@ void Cell_Container_py::initialize(double x_start, double x_end, double y_start,
 
 void Cell_Container_py::initialize(double x_start, double x_end, double y_start, double y_end, double z_start, double z_end , double dx, double dy, double dz){
     all_cells = (std::vector<PhysiCell::Cell*> *) &all_basic_agents;	
-	boundary_condition_for_pushed_out_agents= PhysiCell_constants::default_boundary_condition_for_pushed_out_agents;
+	boundary_condition_for_pushed_out_agents= PhysiCell::PhysiCell_constants::default_boundary_condition_for_pushed_out_agents;
 	std::vector<PhysiCell::Cell*> cells_ready_to_divide;
 	std::vector<PhysiCell::Cell*> cells_ready_to_die;
 
@@ -76,14 +76,13 @@ void Cell_Container_py::create_cell_container_for_microenvironment( BioFVM::Micr
     initialize( m.mesh.bounding_box[0], m.mesh.bounding_box[3], 
         m.mesh.bounding_box[1], m.mesh.bounding_box[4], 
         m.mesh.bounding_box[2], m.mesh.bounding_box[5],  mechanics_voxel_size );
-    //m.agent_container = (BioFVM::Agent_Container*) Cell_Container_py::; //TODO FIX THIS
+    m.agent_container = (BioFVM::Agent_Container*) this; //TODO FIX THIS
     return;
 }
 
 void Cell_Container_py::update_all_cells(double t, double phenotype_dt_ , double mechanics_dt_ ){
-    	update_all_cells(t, phenotype_dt_, mechanics_dt_ , PhysiCell::diffusion_dt );
-	
-	return; 
+    update_all_cells(t, phenotype_dt_, mechanics_dt_ , PhysiCell::diffusion_dt );
+    return; 
 }
 void Cell_Container_py::update_all_cells(double t, double phenotype_dt_ , double mechanics_dt_ , double diffusion_dt_ ){
     	// secretions and uptakes. Syncing with BioFVM is automated. 
@@ -131,11 +130,11 @@ void Cell_Container_py::update_all_cells(double t, double phenotype_dt_ , double
 		// process divides / removes 
 		for( int i=0; i < cells_ready_to_divide.size(); i++ )
 		{
-			cells_ready_to_divide[i]->divide();
+			divide_cell(cells_ready_to_divide[i]); //TODO
 		}
 		for( int i=0; i < cells_ready_to_die.size(); i++ )
 		{	
-			cells_ready_to_die[i]->die();	
+			kill_cell(cells_ready_to_die[i]);	//TODO
 		}
 		num_divisions_in_current_step+=  cells_ready_to_divide.size();
 		num_deaths_in_current_step+=  cells_ready_to_die.size();
@@ -215,14 +214,186 @@ void Cell_Container_py::update_all_cells(double t, double phenotype_dt_ , double
 }
 
 // making the create and save cell functions part of the 
-PhysiCell::Cell* Cell_Container_py::create_cell( void ){}
-PhysiCell::Cell* Cell_Container_py::create_cell( PhysiCell::Cell_Definition& cd ){}
+PhysiCell::Cell* Cell_Container_py::create_cell( void ){
+    PhysiCell::Cell* pNew; 
+    pNew = new PhysiCell::Cell;		
+    (*all_cells).push_back( pNew ); 
+    pNew->index=(*all_cells).size()-1;
 
-void Cell_Container_py::delete_cell( int index ){}
-void Cell_Container_py::delete_cell( PhysiCell::Cell* ){}
+    // All the phenotype and other data structures are already set 
+    // by virtue of the default Cell constructor. 
+
+    pNew->set_total_volume( pNew->phenotype.volume.total ); 
+
+    return pNew; 
+}
+PhysiCell::Cell* Cell_Container_py::create_cell( PhysiCell::Cell_Definition& cd ){
+    PhysiCell::Cell* pNew = create_cell(); 
+	
+	// use the cell defaults; 
+	pNew->type = cd.type; 
+	pNew->type_name = cd.name; 
+	
+	pNew->custom_data = cd.custom_data; 
+	pNew->parameters = cd.parameters; 
+	pNew->functions = cd.functions; 
+	
+	pNew->phenotype = cd.phenotype; 
+	pNew->is_movable = true;
+	pNew->is_out_of_domain = false;
+	pNew->displacement.resize(3,0.0); // state? 
+	
+	pNew->assign_orientation();
+	
+	pNew->set_total_volume( pNew->phenotype.volume.total ); 
+	
+	return pNew; 
+}
+
+void Cell_Container_py::delete_cell( int index ){
+    	
+	PhysiCell::Cell* pDeleteMe = (*all_cells)[index]; 
+	
+	// release any attached cells (as of 1.7.2 release)
+	pDeleteMe->remove_all_attached_cells(); 
+	
+	// released internalized substrates (as of 1.5.x releases)
+	pDeleteMe->release_internalized_substrates(); 
+
+	// performance goal: don't delete in the middle -- very expensive reallocation
+	// alternative: copy last element to index position, then shrink vector by 1 at the end O(constant)
+
+	// move last item to index location  
+	(*all_cells)[ (*all_cells).size()-1 ]->index=index;
+	(*all_cells)[index] = (*all_cells)[ (*all_cells).size()-1 ];
+	// shrink the vector
+	(*all_cells).pop_back();	
+	
+	// deregister agent in from the agent container
+	pDeleteMe->get_container()->remove_agent(pDeleteMe);
+	// de-allocate (delete) the cell; 
+	delete pDeleteMe; 
+
+
+	return; 
+    
+}
+void Cell_Container_py::delete_cell( PhysiCell::Cell* pDelete){
+    
+    delete_cell(pDelete->index);
+    return; 
+}
+
+void kill_cell(PhysiCell::Cell* pDelete){
+    delete_cell(pDelete);
+    return;
+}
+
+PhysiCell::Cell* Cell_Container_py::divide_cell(PhysiCell::Cell* pDivide){
+    pDivide->remove_all_attached_cells(); 
+	
+	PhysiCell::Cell* child = create_cell();
+	child->copy_data( pDivide );	
+	child->copy_function_pointers(pDivide);
+	child->parameters = pDivide->parameters;
+	
+	// evenly divide internalized substrates 
+	// if these are not actively tracked, they are zero anyway 
+	*pDivide->internalized_substrates *= 0.5; 
+	*(child->internalized_substrates) = *pDivide->internalized_substrates ; 
+	
+	// The following is already performed by create_cell(). JULY 2017 ***
+	// child->register_microenvironment( get_microenvironment() );
+	
+	// randomly place the new agent close to me, accounting for orientation and 
+	// polarity (if assigned)
+		
+	// May 30, 2020: 
+	// Set cell_division_orientation = LegacyRandomOnUnitSphere to 
+	// reproduce this code 
+	/*
+	double temp_angle = 6.28318530717959*UniformRandom();
+	double temp_phi = 3.1415926535897932384626433832795*UniformRandom();
+	
+	double radius= phenotype.geometry.radius;
+	std::vector<double> rand_vec (3, 0.0);
+	
+	rand_vec[0]= cos( temp_angle ) * sin( temp_phi );
+	rand_vec[1]= sin( temp_angle ) * sin( temp_phi );
+	rand_vec[2]= cos( temp_phi );
+	
+	rand_vec = rand_vec- phenotype.geometry.polarity*(rand_vec[0]*state.orientation[0]+ 
+		rand_vec[1]*state.orientation[1]+rand_vec[2]*state.orientation[2])*state.orientation;
+	
+	if( norm(rand_vec) < 1e-16 )
+	{
+		std::cout<<"************ERROR********************"<<std::endl;
+	}
+	normalize( &rand_vec ); 
+	rand_vec *= radius; // multiply direction times the displacement 
+	*/
+	
+	std::vector<double> rand_vec = PhysiCell::cell_division_orientation(); 
+	rand_vec = rand_vec- pDivide->phenotype.geometry.polarity*(rand_vec[0]*pDivide->state.orientation[0]+ 
+		rand_vec[1]*pDivide->state.orientation[1]+rand_vec[2]*pDivide->state.orientation[2])*pDivide->state.orientation;	
+	rand_vec *= pDivide->phenotype.geometry.radius;
+
+	child->assign_position(pDivide->position[0] + rand_vec[0],
+						   pDivide->position[1] + rand_vec[1],
+						   pDivide->position[2] + rand_vec[2]);
+						 
+	//change my position to keep the center of mass intact 
+	// and then see if I need to update my voxel index
+	static double negative_one_half = -0.5; 
+	axpy( &pDivide->position, negative_one_half , rand_vec ); // position = position - 0.5*rand_vec; 
+
+	//If this cell has been moved outside of the boundaries, mark it as such.
+	//(If the child cell is outside of the boundaries, that has been taken care of in the assign_position function.)
+	if( underlying_mesh.is_position_valid(pDivide->position[0], pDivide->position[1], pDivide->position[2]))
+	{
+		pDivide->is_out_of_domain = true;
+		pDivide->is_active = false;
+		pDivide->is_movable = false;
+	}	
+	 
+	pDivide->update_voxel_in_container();
+	pDivide->phenotype.volume.divide(); 
+	child->phenotype.volume.divide();
+	child->set_total_volume(child->phenotype.volume.total);
+	pDivide->set_total_volume(pDivide->phenotype.volume.total);
+	
+	// child->set_phenotype( phenotype ); 
+	child->phenotype = pDivide->phenotype; 
+	
+	return child;
+}
 
 void Cell_Container_py::save_all_cells_to_matlab( std::string filename ){}
-void Cell_Container_py::delete_cell_original( int index ){}
+void Cell_Container_py::delete_cell_original( int index ){
+    //	std::cout << __FUNCTION__ << " " << (*all_cells)[index] 
+//	<< " " << (*all_cells)[index]->type_name << std::endl; 
+	
+	// release any attached cells (as of 1.7.2 release)
+	(*all_cells)[index]->remove_all_attached_cells(); 
+	
+	// released internalized substrates (as of 1.5.x releases)
+	(*all_cells)[index]->release_internalized_substrates(); 
+	
+	// deregister agent in from the agent container
+	(*all_cells)[index]->get_container()->remove_agent((*all_cells)[index]);
+	// de-allocate (delete) the cell; 
+	delete (*all_cells)[index]; 
+
+	// performance goal: don't delete in the middle -- very expensive reallocation
+	// alternative: copy last element to index position, then shrink vector by 1 at the end O(constant)
+
+	// move last item to index location  
+	(*all_cells)[ (*all_cells).size()-1 ]->index=index;
+	(*all_cells)[index] = (*all_cells)[ (*all_cells).size()-1 ];
+	// shrink the vector
+	(*all_cells).pop_back();	
+	return; 
+}
 
 
 
