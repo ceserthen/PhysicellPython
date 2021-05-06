@@ -36,12 +36,46 @@
 #############################################################################
 */
 
-#ifndef __BioFVM_py_h__
-#define __BioFVM_py_h__
+#ifndef __physicellcore_py_h__
+#define __physicellcore_py_h__
 
 #include "../../../src/physicellcore/PhysiCell.h"
+//TODO:Pathology
+//TODO:Various Outputs
 
 namespace PhysiCellCore_py{
+
+class Cell_Container_py : public PhysiCell::Cell_Container {
+public:
+    std::vector<PhysiCell::Cell*> *all_cells; 
+    
+    Cell_Container_py();
+    
+    
+    void initialize(double x_start, double x_end, double y_start, double y_end, double z_start, double z_end , double voxel_size);
+    void initialize(double x_start, double x_end, double y_start, double y_end, double z_start, double z_end , double dx, double dy, double dz);
+    
+    void create_cell_container_for_microenvironment( BioFVM::Microenvironment& m , double mechanics_voxel_size ); //TODO
+    
+    void update_all_cells(double t, double phenotype_dt_ , double mechanics_dt_ ); //TODO
+    void update_all_cells(double t, double phenotype_dt_ , double mechanics_dt_ , double diffusion_dt_ );//TODO
+    
+    // making the create and save cell functions part of the 
+    PhysiCell::Cell* create_cell( void );//TODO Find Problems with rest of system
+    PhysiCell::Cell* create_cell( PhysiCell::Cell_Definition& cd );//TODO
+    
+    void delete_cell( int index );//TODO
+    void delete_cell( PhysiCell::Cell* ); //TODO
+    
+    void save_all_cells_to_matlab( std::string filename ); //TODO
+    void delete_cell_original( int index ); //TODO
+    
+};
+
+void add_PhysiCell_cells_to_open_xml_pugi_py( pugi::xml_document& xml_dom, std::string filename_base, Microenvironment& M, Cell_Container_py& CellCon  );//TODO
+
+void save_PhysiCell_to_MultiCellDS_xml_pugi_py( std::string filename_base , Microenvironment& M , Cell_Container_py& CellCon, double current_simulation_time);
+
 
     
 }//end namespace PhysiCellCore_py

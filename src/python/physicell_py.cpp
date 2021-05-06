@@ -51,6 +51,7 @@
 
 #include "BioFVM/biofvm_py.h"
 #include "../physicellcore/PhysiCell.h"
+#include "physicellcore/physicellcore_py.h"
 
 namespace py = pybind11;
 
@@ -178,7 +179,7 @@ PYBIND11_MODULE(physicell, p)
         py::module_ pcore  = p.def_submodule("core", "core modules for physicell"); 
         
 //Cell Container
-        py::class_<PhysiCell::Cell_Container>(pcore, "Cell_Container")
+        py::class_<PhysiCell::Cell_Container>(pcore, "Cell_Container_legacy")
             //contructors
             .def(py::init<>())
             
@@ -743,4 +744,34 @@ PYBIND11_MODULE(physicell, p)
         
         .def("sync_to_default_functions", static_cast<void (PhysiCell::Phenotype::*) ( void)> (&PhysiCell::Phenotype::sync_to_default_functions), "sync_to_default_functions")
         ;
+        
+    //Objects and Functions Designed for use with Python
+        
+    //Cell Container_py (replacing the legacy cell container to better maintain the update_all_cells
+    py::class_<PhysiCellCore_py::Cell_Container_py>(pcore, "Cell_Container")
+    //contructors
+        .def(py::init<>())
+        
+        //attributes
+        .def_readwrite("all_cells", &PhysiCellCore_py::Cell_Container_py::all_cells)
+        
+        //operators
+        .def("initialize", static_cast<void (PhysiCellCore_py::Cell_Container_py::*) (double, double, double, double, double, double, double)> (&PhysiCellCore_py::Cell_Container_py::initialize), "initialize", py::arg("x_start"), py::arg("x_end"), py::arg("y_start"), py::arg("y_end"), py::arg("z_start"), py::arg("z_end"), py::arg("voxel_size"))
+        .def("initialize", static_cast<void (PhysiCellCore_py::Cell_Container_py::*) (double, double, double, double, double, double, double, double, double)> (&PhysiCellCore_py::Cell_Container_py::initialize), "initialize", py::arg("x_start"), py::arg("x_end"), py::arg("y_start"), py::arg("y_end"), py::arg("z_start"), py::arg("z_end"), py::arg("dx"), py::arg("dy"), py::arg("dz"))
+        
+        .def("create_cell_container_for_microenvironment", static_cast<void (PhysiCellCore_py::Cell_Container_py::*) (BioFVM::Microenvironment&, double)> (&PhysiCellCore_py::Cell_Container_py::create_cell_container_for_microenvironment), "create_cell_container_for_microenvironment", py::arg("microenvironment"), py::arg("voxel_size"))
+        
+        .def("update_all_cells", static_cast<void (PhysiCellCore_py::Cell_Container_py::*) (double, double, double)> (&PhysiCellCore_py::Cell_Container_py::update_all_cells), "update_all_cells", py::arg("t"), py::arg("phenotype_dt"), py::arg("mechanics_dt"))
+        .def("update_all_cells", static_cast<void (PhysiCellCore_py::Cell_Container_py::*) (double, double, double, double)> (&PhysiCellCore_py::Cell_Container_py::update_all_cells), "update_all_cells", py::arg("t"), py::arg("phenotype_dt"), py::arg("mechanics_dt"), py::arg("diffusion_dt"))
+        
+        .def("create_cell", static_cast<PhysiCell::Cell* (PhysiCellCore_py::Cell_Container_py::*) (void)> (&PhysiCellCore_py::Cell_Container_py::create_cell), "create_cell")
+        .def("create_cell", static_cast<PhysiCell::Cell* (PhysiCellCore_py::Cell_Container_py::*) (PhysiCell::Cell_Definition&)> (&PhysiCellCore_py::Cell_Container_py::create_cell), "create_cell")
+        
+        .def("delete_cell", static_cast<void (PhysiCellCore_py::Cell_Container_py::*) (int)> (&PhysiCellCore_py::Cell_Container_py::delete_cell), "delete_cell", py::arg("cell_index"))
+        .def("delete_cell", static_cast<void (PhysiCellCore_py::Cell_Container_py::*) (PhysiCell::Cell*)> (&PhysiCellCore_py::Cell_Container_py::delete_cell), "delete_cell", py::arg("cell"))
+        
+        .def("delete_cell_original", static_cast<void (PhysiCellCore_py::Cell_Container_py::*) (int)> (&PhysiCellCore_py::Cell_Container_py::delete_cell_original), "delete_cell_original", py::arg("cell_index"))
+        ;
+    pcore.def("save_MultiCellDS", &PhysiCellCore_py::save_PhysiCell_to_MultiCellDS_xml_pugi_py, "Save Physicell multicell datastructure", py::arg("filename"), py::arg("microenvironment"), py::arg("cell_container"), py::arg("current_simulation_time"));
+    
 };
