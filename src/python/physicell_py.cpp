@@ -334,7 +334,7 @@ PYBIND11_MODULE(physicell, p)
             
             .def("die", static_cast<void (PhysiCell::Cell::*) (void)> (&PhysiCell::Cell::die), "the cells dies")
             
-            .def("step", static_cast<void (PhysiCell::Cell::*) (double)> (&PhysiCell::Cell::step), "step the cell", py::arg("dt"))
+            //.def("step", static_cast<void (PhysiCell::Cell::*) (double)> (&PhysiCell::Cell::step), "step the cell", py::arg("dt"))
             
             
             .def("assign_position", static_cast<bool (PhysiCell::Cell::*) (std::vector<double>)> (&PhysiCell::Cell::assign_position), "assign_position")
@@ -377,9 +377,9 @@ PYBIND11_MODULE(physicell, p)
             .def("remove_all_attached_cells", static_cast<void (PhysiCell::Cell::*) (void)> (&PhysiCell::Cell::remove_all_attached_cells), "remove_all_attached_cells")
             
             
-            .def("set_phenotype", static_cast<void (PhysiCell::Cell::*) (PhysiCell::Phenotype&)> (&PhysiCell::Cell::set_phenotype), "set_phenotype")
+            //.def("set_phenotype", static_cast<void (PhysiCell::Cell::*) (PhysiCell::Phenotype&)> (&PhysiCell::Cell::set_phenotype), "set_phenotype")
             
-            .def("update_radius", static_cast<void (PhysiCell::Cell::*) ()> (&PhysiCell::Cell::update_radius), "update_radius")
+            //.def("update_radius", static_cast<void (PhysiCell::Cell::*) ()> (&PhysiCell::Cell::update_radius), "update_radius")
             
             .def("get_container", static_cast<PhysiCell::Cell_Container* (PhysiCell::Cell::*) ()> (&PhysiCell::Cell::get_container), "get_container")
             
@@ -688,7 +688,7 @@ PYBIND11_MODULE(physicell, p)
         ;
         
     //Cell_Functions
-    py::class_<PhysiCell::Cell_Functions>(pcore, "Molecular")
+    py::class_<PhysiCell::Cell_Functions>(pcore, "Cell_Functions")
         //contructors
         .def(py::init<>())
         
@@ -742,7 +742,7 @@ PYBIND11_MODULE(physicell, p)
         
         .def("sync_to_microenvironment", static_cast<void (PhysiCell::Phenotype::*) ( BioFVM::Microenvironment*)> (&PhysiCell::Phenotype::sync_to_microenvironment), "sync_to_microenvironment")
         
-        .def("sync_to_default_functions", static_cast<void (PhysiCell::Phenotype::*) ( void)> (&PhysiCell::Phenotype::sync_to_default_functions), "sync_to_default_functions")
+        //.def("sync_to_default_functions", static_cast<void (PhysiCell::Phenotype::*) ( void)> (&PhysiCell::Phenotype::sync_to_default_functions), "sync_to_default_functions")
         ;
         
     //Objects and Functions Designed for use with Python
@@ -751,6 +751,7 @@ PYBIND11_MODULE(physicell, p)
     py::class_<PhysiCellCore_py::Cell_Container_py>(pcore, "Cell_Container")
     //contructors
         .def(py::init<>())
+        .def(py::init<BioFVM::Microenvironment& , double>(), py::arg("microenvironment"), py::arg("voxel_size"))
         
         //attributes
         .def_readwrite("all_cells", &PhysiCellCore_py::Cell_Container_py::all_cells)

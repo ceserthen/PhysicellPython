@@ -50,6 +50,7 @@ public:
     std::vector<PhysiCell::Cell*> *all_cells; 
     
     Cell_Container_py();
+    Cell_Container_py(BioFVM::Microenvironment& m , double mechanics_voxel_size);
     
     
     void initialize(double x_start, double x_end, double y_start, double y_end, double z_start, double z_end , double voxel_size);

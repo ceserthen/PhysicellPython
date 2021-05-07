@@ -52,6 +52,14 @@ Cell_Container_py::Cell_Container_py()
     
 }
 
+Cell_Container_py::Cell_Container_py(BioFVM::Microenvironment& m , double mechanics_voxel_size )
+{
+    Cell_Container_py();
+    create_cell_container_for_microenvironment( m , mechanics_voxel_size );
+	return; 
+    
+}
+
 void Cell_Container_py::initialize(double x_start, double x_end, double y_start, double y_end, double z_start, double z_end , double voxel_size){
     initialize(x_start, x_end, y_start, y_end, z_start, z_end , voxel_size, voxel_size, voxel_size);
     return;
@@ -284,7 +292,7 @@ void Cell_Container_py::delete_cell( PhysiCell::Cell* pDelete){
     return; 
 }
 
-void kill_cell(PhysiCell::Cell* pDelete){
+void Cell_Container_py::kill_cell(PhysiCell::Cell* pDelete){
     delete_cell(pDelete);
     return;
 }
