@@ -72,7 +72,6 @@
 #include <vector>
 
 #include "../physicellcore/PhysiCell.h"
-#include "./PhysiCell_settings.h"
 
 
 namespace PhysiCell

@@ -76,9 +76,6 @@
 #include "./PhysiCell_MultiCellDS.h"
 #include "./PhysiCell_various_outputs.h"
 
-#include "./PhysiCell_pugixml.h"
-#include "./PhysiCell_settings.h" 
-
 #include "./PhysiCell_geometry.h" 
 
 #endif

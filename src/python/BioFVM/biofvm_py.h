@@ -41,8 +41,8 @@
 
 #include "../../../src/BioFVM/BioFVM.h"
 #include "../../../src/BioFVM/pugixml.hpp"
-#include "../../../src/modules/PhysiCell_settings.h"
-#include "../../../src/modules/PhysiCell_pugixml.h"
+#include "../../../src/physicellcore/PhysiCell_settings.h"
+#include "../../../src/physicellcore/PhysiCell_pugixml.h"
 
 namespace BioFVM_py{
     
