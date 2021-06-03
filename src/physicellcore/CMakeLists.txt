@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 
-add_library(core SHARED
+add_library(physicellcore SHARED
 PhysiCell_basic_signaling.cpp
 PhysiCell_cell.cpp
 PhysiCell_cell_container.cpp
@@ -10,9 +10,11 @@ PhysiCell_custom.cpp
 PhysiCell_phenotype.cpp
 PhysiCell_standard_models.cpp
 PhysiCell_utilities.cpp
+PhysiCell_pugixml.cpp
+PhysiCell_settings.cpp
 )
 
-target_link_libraries(core biofvm ${OpenMP_CXX_LIBRARIES})
+target_link_libraries(physicellcore biofvm ${OpenMP_CXX_LIBRARIES})
 
-install(TARGETS core DESTINATION lib)
+install(TARGETS physicellcore DESTINATION lib)
 

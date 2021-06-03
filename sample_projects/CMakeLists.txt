@@ -8,6 +8,7 @@ add_subdirectory(worm)
 add_subdirectory(virus_macrophage)
 add_subdirectory(cancer_biorobots)
 add_subdirectory(biorobots)
+add_subdirectory(cancer_immune)
 
 #Physicell Project Template
 add_subdirectory(template)

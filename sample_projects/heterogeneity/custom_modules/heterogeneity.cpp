@@ -66,7 +66,7 @@
 */
 
 #include "heterogeneity.h"
-#include "../../../src/modules/PhysiCell_settings.h"
+#include "../../../src/physicellcore/PhysiCell_settings.h"
 
 void create_cell_types( void )
 {

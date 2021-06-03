@@ -75,7 +75,7 @@
 #include "./PhysiCell_cell_container.h"
 #include "./PhysiCell_constants.h"
 
-#include "../modules/PhysiCell_settings.h" 
+#include "../physicellcore/PhysiCell_settings.h" 
 
 #include "./PhysiCell_standard_models.h" 
 
