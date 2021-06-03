@@ -14,3 +14,10 @@ install(DIRECTORY DESTINATION "virus_macrophage/output")
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/sample_projects/virus_macrophage/config DESTINATION "virus_macrophage")
 install(TARGETS virus_macrophage DESTINATION "virus_macrophage")
 
+
+IF(WIN32)
+	install(TARGETS biofvm DESTINATION "virus_macrophage")
+	install(TARGETS physicellcore  DESTINATION "virus_macrophage")
+	install(TARGETS modules  DESTINATION "virus_macrophage")
+	install(TARGETS virus_macrophagecustmodules DESTINATION "virus_macrophage")
+ENDIF()
