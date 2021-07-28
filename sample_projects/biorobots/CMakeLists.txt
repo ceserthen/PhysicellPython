@@ -12,7 +12,6 @@ install(DIRECTORY DESTINATION "biorobots/output")
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/sample_projects/biorobots/config DESTINATION "biorobots")
 install(TARGETS biorobots DESTINATION "biorobots")
 
-
 IF(WIN32)
 	install(TARGETS biofvm DESTINATION "biorobots")
 	install(TARGETS physicellcore  DESTINATION "biorobots")

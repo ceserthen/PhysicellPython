@@ -8,8 +8,10 @@ PhysiCell_custom.cpp
 PhysiCell_phenotype.cpp
 PhysiCell_standard_models.cpp
 PhysiCell_utilities.cpp
+
 PhysiCell_settings.cpp
 PhysiCell_pugixml.cpp
+
 )
 
 target_link_libraries(physicellcore biofvm ${OpenMP_CXX_LIBRARIES})

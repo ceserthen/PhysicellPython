@@ -80,7 +80,9 @@ class Cell;
 
 class Cell_Container : public BioFVM::Agent_Container
 {
+
  protected:	
+
 	std::vector<Cell*> cells_ready_to_divide; // the index of agents ready to divide
 	std::vector<Cell*> cells_ready_to_die;
 	int boundary_condition_for_pushed_out_agents; 	// what to do with pushed out cells
