@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 2.8)
-
 
 add_library(biofvm SHARED
      BioFVM_agent_container.cpp 

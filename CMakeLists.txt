@@ -1,6 +1,7 @@
-cmake_minimum_required( VERSION 2.8 )
 
-project(PhysiCell CXX )
+cmake_minimum_required( VERSION 3.4 )
+
+project(PhysiCellPython)
 
 # remove compiler checks if you are using VS2010, it supports
 #   1. auto
@@ -33,6 +34,15 @@ FIND_PACKAGE( OpenMP)
   endif()
 include_directories(SYSTEM ${OpenMP_INCLUDE_PATH})
 
+include(AddGitSubmodule.cmake)
+
+add_git_submodule(pybind11)
+
+# Find default python libraries and interpreter
+find_package(PythonInterp REQUIRED)
+find_package(PythonLibs REQUIRED)
+#add_subdirectory(pybind11)
+
 #Setting the Runtime Path
 
 # use, i.e. don't skip the full RPATH for the build tree
@@ -56,3 +66,5 @@ endif("${isSystemDir}" STREQUAL "-1")
 
 add_subdirectory(src)
 add_subdirectory(sample_projects)
+add_subdirectory(python)
+

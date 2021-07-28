@@ -72,7 +72,7 @@
 #include <vector>
 
 #include "../physicellcore/PhysiCell.h"
-#include "../physicellcore/PhysiCell_settings.h"
+
 
 
 namespace PhysiCell

@@ -75,7 +75,9 @@
 
 #include "../BioFVM/BioFVM.h" 
 
-#include "../physicellcore/PhysiCell_settings.h"
+
+#include "./PhysiCell_settings.h"
+
 
 using namespace BioFVM; 
 

@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 2.8)
-
 add_subdirectory(custom_modules)
 
 add_executable(heterogeneity main-heterogeneity.cpp)
@@ -20,3 +18,9 @@ IF(WIN32)
 	install(TARGETS hetcustmodules DESTINATION "heterogeneity")
 ENDIF()
 
+IF(WIN32)
+	install(TARGETS biofvm DESTINATION "heterogeneity")
+	install(TARGETS physicellcore  DESTINATION "heterogeneity")
+	install(TARGETS modules  DESTINATION "heterogeneity")
+	install(TARGETS hetcustmodules DESTINATION "heterogeneity")
+ENDIF()

@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 2.8)
-
 add_subdirectory(custom_modules)
 
 add_executable(biorobots main-biorobots.cpp)

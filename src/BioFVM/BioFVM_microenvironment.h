@@ -46,6 +46,7 @@
 #############################################################################
 */
 
+
 #ifndef __BioFVM_microenvironment_h__
 #define __BioFVM_microenvironment_h__
 
@@ -64,7 +65,7 @@ class Basic_Agent;
 
 class Microenvironment
 {
- private:
+ protected:
 	friend std::ostream& operator<<(std::ostream& os, const Microenvironment& S);  
 
 	/*! For internal use and accelerations in solvers */ 
