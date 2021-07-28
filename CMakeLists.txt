@@ -1,13 +1,6 @@
 cmake_minimum_required( VERSION 3.4 )
 
-project(PhysiCell CXX )
-
-
-#Boost for exposing C++ for Python coding: https://flanusse.net/interfacing-c++-with-python.html
-include(ExternalProject)
-
-# Adding customized cmake module for building boost
-list(APPEND CMAKE_MODULE_PATH  "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+project(PhysiCell Python)
 
 # remove compiler checks if you are using VS2010, it supports
 #   1. auto
@@ -44,12 +37,7 @@ include_directories(SYSTEM ${OpenMP_INCLUDE_PATH})
 # Find default python libraries and interpreter
 find_package(PythonInterp REQUIRED)
 find_package(PythonLibs REQUIRED)
-#include(BuildBoost) # Custom module
-#find_package(Boost REQUIRED COMPONENTS python numpy)
 add_subdirectory(pybind11)
-#include_directories(${Boost_INCLUDE_DIR} ${PYTHON_INCLUDE_DIRS})
-#link_directories(${Boost_LIBRARY_DIR})
-
 
 #Setting the Runtime Path
 
