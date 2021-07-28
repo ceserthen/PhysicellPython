@@ -1,0 +1,1 @@
+install(DIRECTORY ${CMAKE_SOURCE_DIR}/python/ DESTINATION "python")
