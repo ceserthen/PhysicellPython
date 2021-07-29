@@ -71,8 +71,8 @@ endif()
 
 include_directories(SYSTEM ${OpenMP_INCLUDE_PATH})
 
-include(AddGitSubmodule.cmake)
-
+include(AddGitSubmodule.cmake) 
+#TODO: Add cmake version catching
 add_git_submodule(pybind11)
 
 # Find default python libraries and interpreter

@@ -137,9 +137,55 @@ PYBIND11_MODULE(physicell, p)
         
         .def("resize_space_uniform", static_cast<void (BioFVM::Microenvironment::*)(double,double,double,double,double,double,double)> (&BioFVM::Microenvironment::resize_space_uniform), "resize_space_uniform", py::arg("x_start"), py::arg("x_end"), py::arg("y_start"), py::arg("y_end"), py::arg("z_start"), py::arg("z_end"), py::arg("dx_new"))
         
+        .def("resize_densities", static_cast<void (BioFVM::Microenvironment::*)(int)> (&BioFVM::Microenvironment::resize_densities), "resize_densities", py::arg("new_size"))
+        .def("add_density", static_cast<void (BioFVM::Microenvironment::*)(void)> (&BioFVM::Microenvironment::add_density), "add_density")
+        .def("add_density", static_cast<void (BioFVM::Microenvironment::*)(std::string, std::string)> (&BioFVM::Microenvironment::add_density), "add_density", py::arg("name"), py::arg("units"))
+        .def("add_density", static_cast<void (BioFVM::Microenvironment::*)(std::string, std::string, double, double)> (&BioFVM::Microenvironment::add_density), "add_density", py::arg("name"), py::arg("units"), py::arg("diffusion_constan"), py::arg("decay_rate"))
+        
+
+	// void set_density( int index , std::string name , std::string units ); 
+	// void set_density( int index , std::string name , std::string units , double diffusion_constant , double decay_rate ); 
+
+        .def("find_density_index", static_cast<int (BioFVM::Microenvironment::*)(std::string)>(&BioFVM::Microenvironment::find_density_index), "add_density", py::arg("name"))
+	
+	// int voxel_index( int i, int j, int k ); 
+	// std::vector<unsigned int> cartesian_indices( int n ); 
+	
+	// int nearest_voxel_index( std::vector<double>& position ); 
+	// std::vector<unsigned int> nearest_cartesian_indices( std::vector<double>& position ); 
+	// Voxel& nearest_voxel( std::vector<double>& position ); 
+	// Voxel& voxels( int voxel_index );
+	// std::vector<double>& nearest_density_vector( std::vector<double>& position );  
+	// std::vector<double>& nearest_density_vector( int voxel_index );  
+
+	// /*! access the density vector at  [ X(i),Y(j),Z(k) ] */
+	// std::vector<double>& operator()( int i, int j, int k ); 
+	// /*! access the density vector at  [ X(i),Y(j),0 ]  -- helpful for 2-D problems */
+	// std::vector<double>& operator()( int i, int j );  
+	// /*! access the density vector at [x,y,z](n) */
+	// std::vector<double>& operator()( int n );  
+	
+	// std::vector<gradient>& gradient_vector(int i, int j, int k); 
+	// std::vector<gradient>& gradient_vector(int i, int j ); 
+	// std::vector<gradient>& gradient_vector(int n );  
+	
+	// std::vector<gradient>& nearest_gradient_vector( std::vector<double>& position ); 
+
+	// void compute_all_gradient_vectors( void ); 
+	// void compute_gradient_vector( int n );  
+	// void reset_all_gradient_vectors( void ); 
+	
+	// /*! access the density vector at  [ X(i),Y(j),Z(k) ] */
+	// std::vector<double>& density_vector( int i, int j, int k ); 
+	// /*! access the density vector at  [ X(i),Y(j),0 ]  -- helpful for 2-D problems */
+	// std::vector<double>& density_vector( int i, int j ); 
+	// /*! access the density vector at [x,y,z](n) */
+	// std::vector<double>& density_vector( int n ); 
+
         //simulation methods
         .def("simulate_diffusion_decay", static_cast<void (BioFVM::Microenvironment::*)(double)>(&BioFVM::Microenvironment::simulate_diffusion_decay), "advance the diffusion-decay solver by dt time", py::arg("dt"))
-        
+
+
         ;
    
         
