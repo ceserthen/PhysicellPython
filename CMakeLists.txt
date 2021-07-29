@@ -82,7 +82,7 @@ find_package(PythonLibs REQUIRED)
 
 #Setting the Runtime Path
 if(APPLE)
-    CMAKE_MACOSX_RPATH=ON
+    set(CMAKE_MACOSX_RPATH=ON)
 endif()
 # use, i.e. don't skip the full RPATH for the build tree
 set(CMAKE_SKIP_BUILD_RPATH FALSE)
@@ -104,6 +104,8 @@ if("${isSystemDir}" STREQUAL "-1")
 endif("${isSystemDir}" STREQUAL "-1")
 
 add_subdirectory(src)
-add_subdirectory(sample_projects)
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    add_subdirectory(sample_projects)
+endif()
 add_subdirectory(python)
 
