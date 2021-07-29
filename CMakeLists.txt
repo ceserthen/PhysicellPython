@@ -81,7 +81,9 @@ find_package(PythonLibs REQUIRED)
 #add_subdirectory(pybind11)
 
 #Setting the Runtime Path
-
+if(APPLE)
+    CMAKE_MACOSX_RPATH=ON
+endif()
 # use, i.e. don't skip the full RPATH for the build tree
 set(CMAKE_SKIP_BUILD_RPATH FALSE)
 
