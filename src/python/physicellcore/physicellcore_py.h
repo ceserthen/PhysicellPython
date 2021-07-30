@@ -40,6 +40,7 @@
 #define __physicellcore_py_h__
 
 #include "../../../src/physicellcore/PhysiCell.h"
+#include "../BioFVM/biofvm_py.h"
 //TODO:Pathology
 //TODO:Various Outputs
 
@@ -78,7 +79,7 @@ public:
 
 void add_PhysiCell_cells_to_open_xml_pugi_py( pugi::xml_document& xml_dom, std::string filename_base, Microenvironment& M, Cell_Container_py& CellCon  );
 
-void save_PhysiCell_to_MultiCellDS_xml_pugi_py( std::string filename_base , Microenvironment& M , Cell_Container_py& CellCon, double current_simulation_time);
+void save_PhysiCell_to_MultiCellDS_xml_pugi_py( std::string filename_base , BioFVM_py::Microenvironment_py& M , Cell_Container_py& CellCon, double current_simulation_time);
 
 
     

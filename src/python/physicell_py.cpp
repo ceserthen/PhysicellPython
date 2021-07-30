@@ -42,6 +42,7 @@
 #include <pybind11/stl.h>
 #include <pybind11/stl_bind.h>
 #include <pybind11/iostream.h>
+//#include <pybind11/functional.h>
 
 
 
@@ -59,6 +60,9 @@ namespace py = pybind11;
 
 PYBIND11_MAKE_OPAQUE(std::vector<std::string, std::allocator<std::string>>);
 using StringList = std::vector<std::string, std::allocator<std::string>>;
+
+PYBIND11_MAKE_OPAQUE(std::vector<unsigned int, std::allocator<unsigned int>>);
+using UIntList = std::vector<unsigned int, std::allocator<unsigned int>>;
 
 PYBIND11_MAKE_OPAQUE(std::vector<double, std::allocator<double>>);
 using DoubleList = std::vector<double, std::allocator<double>>;
@@ -92,7 +96,10 @@ PYBIND11_MODULE(physicell, p)
     //TODO: Not currently working DAB 05-03-21
     //py::bind_vector<std::vector<std::vector<double>>>(m, "VectorVectorDouble");
     
-    
+    py::class_<pugi::xml_document>(m, "xml_document_pugi")
+//contructors
+    .def(py::init<>())
+    ;
 //Microenvironment class
     py::class_<BioFVM::Microenvironment>(m, "Microenvironmentleg")
         //constructors
@@ -142,14 +149,14 @@ PYBIND11_MODULE(physicell, p)
         .def("add_density", static_cast<void (BioFVM::Microenvironment::*)(std::string, std::string)> (&BioFVM::Microenvironment::add_density), "add_density", py::arg("name"), py::arg("units"))
         .def("add_density", static_cast<void (BioFVM::Microenvironment::*)(std::string, std::string, double, double)> (&BioFVM::Microenvironment::add_density), "add_density", py::arg("name"), py::arg("units"), py::arg("diffusion_constan"), py::arg("decay_rate"))
         
-
-	// void set_density( int index , std::string name , std::string units ); 
-	// void set_density( int index , std::string name , std::string units , double diffusion_constant , double decay_rate ); 
+        .def("set_density", static_cast<void (BioFVM::Microenvironment::*)(int, std::string, std::string)> (&BioFVM::Microenvironment::set_density), "set_density", py::arg("index"), py::arg("name"), py::arg("units"))
+        .def("set_density", static_cast<void (BioFVM::Microenvironment::*)(int, std::string, std::string, double, double)> (&BioFVM::Microenvironment::set_density), "set_density", py::arg("index"),py::arg("name"), py::arg("units"), py::arg("diffusion_constan"), py::arg("decay_rate"))
 
         .def("find_density_index", static_cast<int (BioFVM::Microenvironment::*)(std::string)>(&BioFVM::Microenvironment::find_density_index), "add_density", py::arg("name"))
 	
-	// int voxel_index( int i, int j, int k ); 
-	// std::vector<unsigned int> cartesian_indices( int n ); 
+        .def("voxel_index", static_cast<int (BioFVM::Microenvironment::*)(int, int, int)>(&BioFVM::Microenvironment::voxel_index), "voxel_index", py::arg("i"), py::arg("j"), py::arg("k"))
+
+        .def("cartesian_indices", static_cast<std::vector<unsigned int> (BioFVM::Microenvironment::*)(int)>(&BioFVM::Microenvironment::cartesian_indices), "cartesian_indices", py::arg("n"))
 	
 	// int nearest_voxel_index( std::vector<double>& position ); 
 	// std::vector<unsigned int> nearest_cartesian_indices( std::vector<double>& position ); 
@@ -743,6 +750,9 @@ PYBIND11_MODULE(physicell, p)
         
         
         //TODO: Function pointers
+        //void (*volume_update_function)( Cell* pCell, Phenotype& phenotype , double dt );
+        //.def("volume_update_function", static_cast<void (PhysiCell::CellFunctions::*) (PhysiCell::Cell*, PhysiCell::Phenotype&,double)> (&PhysiCell::Cell_Functions::volume_update_function))
+        //.def("assign_volume_update_function", [](Physicell::Cell_Functions &cellfunction){cellfunction.volume_update_function})
         ;
     //Molecular
     py::class_<PhysiCell::Molecular>(pcore, "Molecular")
@@ -821,4 +831,6 @@ PYBIND11_MODULE(physicell, p)
         ;
     pcore.def("save_MultiCellDS", &PhysiCellCore_py::save_PhysiCell_to_MultiCellDS_xml_pugi_py, "Save Physicell multicell datastructure", py::arg("filename"), py::arg("microenvironment"), py::arg("cell_container"), py::arg("current_simulation_time"));
     
+
+
 };

@@ -406,21 +406,25 @@ void Cell_Container_py::delete_cell_original( int index ){
 
 
 
-void save_PhysiCell_to_MultiCellDS_xml_pugi_py( std::string filename_base , Microenvironment& M , Cell_Container_py& CellCon, double current_simulation_time)
+void save_PhysiCell_to_MultiCellDS_xml_pugi_py( std::string filename_base , 
+												BioFVM_py::Microenvironment_py& M , 
+												Cell_Container_py& CellCon, 
+												double current_simulation_time)
 {
     // start with a standard BioFVM save
 
-    add_BioFVM_to_open_xml_pugi( BioFVM::biofvm_doc , filename_base , current_simulation_time , M ); 
-
+    add_BioFVM_to_open_xml_pugi( BioFVM::biofvm_doc, filename_base , current_simulation_time , M ); 
     // now, add the PhysiCell data using the new container linked version
 
-    add_PhysiCell_cells_to_open_xml_pugi_py( BioFVM::biofvm_doc , filename_base , M , CellCon); 
-        
+    // add_PhysiCell_cells_to_open_xml_pugi_py( localbiofvm_doc , filename_base , M , CellCon); 
+    std::cout<< "2";
     // Lastly, save to the indicated filename 
 
     char filename[1024]; 
     sprintf( filename , "%s.xml" , filename_base.c_str() ); 
+	std::cout<< "3";
     BioFVM::biofvm_doc.save_file( filename );
+	std::cout<< "4";
 
     return; 
     
