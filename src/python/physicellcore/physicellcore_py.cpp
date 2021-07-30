@@ -223,14 +223,17 @@ void Cell_Container_py::update_all_cells(double t, double phenotype_dt_ , double
 
 // making the create and save cell functions part of the 
 PhysiCell::Cell* Cell_Container_py::create_cell( void ){
-    PhysiCell::Cell* pNew; 
-    pNew = new PhysiCell::Cell;		
+	std::cout << "1";
+	PhysiCell::Cell* pNew = new PhysiCell::Cell;	
+	std::cout << "3";	 
     (*all_cells).push_back( pNew ); 
+		std::cout << "2";
     pNew->index=(*all_cells).size()-1;
+	std::cout << "4";
 
     // All the phenotype and other data structures are already set 
     // by virtue of the default Cell constructor. 
-
+std::cout << "5";
     pNew->set_total_volume( pNew->phenotype.volume.total ); 
 
     return pNew; 
@@ -416,15 +419,13 @@ void save_PhysiCell_to_MultiCellDS_xml_pugi_py( std::string filename_base ,
     add_BioFVM_to_open_xml_pugi( BioFVM::biofvm_doc, filename_base , current_simulation_time , M ); 
     // now, add the PhysiCell data using the new container linked version
 
-    // add_PhysiCell_cells_to_open_xml_pugi_py( localbiofvm_doc , filename_base , M , CellCon); 
-    std::cout<< "2";
+    add_PhysiCell_cells_to_open_xml_pugi_py( BioFVM::biofvm_doc , filename_base , M , CellCon); 
     // Lastly, save to the indicated filename 
 
     char filename[1024]; 
     sprintf( filename , "%s.xml" , filename_base.c_str() ); 
-	std::cout<< "3";
     BioFVM::biofvm_doc.save_file( filename );
-	std::cout<< "4";
+	
 
     return; 
     
@@ -434,20 +435,20 @@ void save_PhysiCell_to_MultiCellDS_xml_pugi_py( std::string filename_base ,
 
 void add_PhysiCell_cells_to_open_xml_pugi_py( pugi::xml_document& xml_dom, std::string filename_base, Microenvironment& M, Cell_Container_py& CellCon  ){
 	static double temp_zero = 0.0; 
-	
+
 	if( BioFVM::save_cell_data == false )
 	{ return; }
-	
+
 	pugi::xml_node root = xml_dom.child("MultiCellDS") ; 
 	pugi::xml_node node = root.child( "cellular_information" ); 
 	root = node; 
-	
+
 	// Let's reduce memory allocations and sprintf calls. 
 	// This reduces execution time by around 30%. (e.g., write time for 1,000,000 cells decreases from 
 	// 45 to 30 seconds on an older machine. 
 	static char* temp; 
 	static bool initialized = false; 
-	
+
 	static char rate_chars [1024]; 
 	static char volume_chars [1024]; 
 	static char diffusion_chars [1024]; 
@@ -461,6 +462,7 @@ void add_PhysiCell_cells_to_open_xml_pugi_py( pugi::xml_document& xml_dom, std::
 		sprintf( diffusion_chars , "%s^2/%s", M.spatial_units.c_str() , M.time_units.c_str() ); 
 	}
 	
+
 	node = node.child( "cell_populations" ); 
 	if( !node )
 	{
@@ -511,7 +513,7 @@ void add_PhysiCell_cells_to_open_xml_pugi_py( pugi::xml_document& xml_dom, std::
 				node_temp = (pugi::xml_node) NULL; 
 			}
 		}
-		
+
 		if( !node_temp )
 		{
 			node_temp = node.append_child( "simplified_data" ); 
@@ -520,7 +522,7 @@ void add_PhysiCell_cells_to_open_xml_pugi_py( pugi::xml_document& xml_dom, std::
 			
 			attrib = node_temp.append_attribute( "source" ); 
 			attrib.set_value("PhysiCell"); 
-			
+
 			int index = 0; 
 			int size = 1; 
 			
@@ -555,7 +557,7 @@ void add_PhysiCell_cells_to_open_xml_pugi_py( pugi::xml_document& xml_dom, std::
 			attrib.set_value( size ); 
 			node_temp1 = node_temp1.parent(); 
 			index += size; 
-			
+		
 			// type, cycle model, current phase, elapsed time in phase, 
 			size = 1; 
 			node_temp1 = node_temp1.append_child( "label" );
@@ -566,7 +568,7 @@ void add_PhysiCell_cells_to_open_xml_pugi_py( pugi::xml_document& xml_dom, std::
 			attrib.set_value( size ); 
 			node_temp1 = node_temp1.parent(); 
 			index += size; 
-			
+		
 			size = 1; 
 			node_temp1 = node_temp1.append_child( "label" );
 			node_temp1.append_child( pugi::node_pcdata ).set_value( "cycle_model" ); 
@@ -575,9 +577,9 @@ void add_PhysiCell_cells_to_open_xml_pugi_py( pugi::xml_document& xml_dom, std::
 			attrib = node_temp1.append_attribute( "size" ); 
 			attrib.set_value( size ); 
 			node_temp1 = node_temp1.parent(); 
-			index += size; 			
-			
+			index += size; 					
 			size = 1; 
+
 			node_temp1 = node_temp1.append_child( "label" );
 			node_temp1.append_child( pugi::node_pcdata ).set_value( "current_phase" ); 
 			attrib = node_temp1.append_attribute( "index" ); 
@@ -723,11 +725,14 @@ void add_PhysiCell_cells_to_open_xml_pugi_py( pugi::xml_document& xml_dom, std::
 			node_temp1 = node_temp1.parent(); 
 			index += size; 			
 			// custom variables 
+std::cout<< "start";
 			for( int i=0; i < (*CellCon.all_cells)[0]->custom_data.variables.size(); i++ )
 			{
 				size = 1; 
 				char szTemp [1024]; 
+std::cout<< " checkpoint 1";
 				strcpy( szTemp, (*CellCon.all_cells)[0]->custom_data.variables[i].name.c_str() ); 
+std::cout<< " checkpoint 2";
 				node_temp1 = node_temp1.append_child( "label" );
 				node_temp1.append_child( pugi::node_pcdata ).set_value( szTemp ); 
 				attrib = node_temp1.append_attribute( "index" ); 
@@ -752,8 +757,10 @@ void add_PhysiCell_cells_to_open_xml_pugi_py( pugi::xml_document& xml_dom, std::
 				node_temp1 = node_temp1.parent(); 
 				index += size; 			
 			}
+std::cout<< "2";
 			
 		}
+		std::cout<< "24";
 		node = node_temp; 
 		
 		if( !node.child( "filename" ) )
@@ -914,7 +921,7 @@ void add_PhysiCell_cells_to_open_xml_pugi_py( pugi::xml_document& xml_dom, std::
 	attrib.set_value( "individual" ); 
 
 	// now go through all cells 
-
+	std::cout<< "3";
 	root = node; 
 	for( int i=0; i < (*CellCon.all_cells).size(); i++ )
 	{
@@ -961,6 +968,7 @@ void add_PhysiCell_cells_to_open_xml_pugi_py( pugi::xml_document& xml_dom, std::
 			node = node.parent(); 
 			
 			node = node.parent(); // back up to transport processes 
+			std::cout<< "5";
 		}
 		
 		node = node.parent(); // back up to phenotype 
@@ -992,7 +1000,8 @@ void add_PhysiCell_cells_to_open_xml_pugi_py( pugi::xml_document& xml_dom, std::
 		sprintf( temp , "%.7e %.7e %.7e" , (*CellCon.all_cells)[i]->position[0], (*CellCon.all_cells)[i]->position[1], (*CellCon.all_cells)[i]->position[2] ); 
 		node.append_child( pugi::node_pcdata ).set_value( temp ); 		
 		
-		node = root; 
+		node = root;
+		std::cout<< "6";
 	}
 	
 	return; 

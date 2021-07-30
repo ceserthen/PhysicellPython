@@ -70,8 +70,12 @@ PYBIND11_MAKE_OPAQUE(std::vector<std::vector<double>>);
 
 
 PYBIND11_MAKE_OPAQUE(std::vector<PhysiCell::Cell*, std::allocator<PhysiCell::Cell*>>);
-using CellList = std::vector<PhysiCell::Cell*, std::allocator<PhysiCell::Cell*>>;
+using CellPointerList = std::vector<PhysiCell::Cell*, std::allocator<PhysiCell::Cell*>>;
 PYBIND11_MAKE_OPAQUE(std::vector<std::vector<PhysiCell::Cell*>>);
+
+PYBIND11_MAKE_OPAQUE(std::vector<PhysiCell::Cell, std::allocator<PhysiCell::Cell>>);
+using CellList = std::vector<PhysiCell::Cell, std::allocator<PhysiCell::Cell>>;
+PYBIND11_MAKE_OPAQUE(std::vector<std::vector<PhysiCell::Cell>>);
 
 
 PYBIND11_MAKE_OPAQUE(std::vector<PhysiCell::Cycle_Model*, std::allocator<PhysiCell::Cycle_Model*>>);
