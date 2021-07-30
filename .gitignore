@@ -41,8 +41,8 @@ file:///home/dpb53/github/Physicell-Cmake/sample_projects/virus_macrophage/custo
 **/compile_commands.json
 
 include/divisible/*
-
-
+.vscode/
+.vscode/settings.json
 ## Local 
 
 .idea/*.xml
