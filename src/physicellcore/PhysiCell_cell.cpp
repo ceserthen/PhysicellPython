@@ -353,7 +353,7 @@ Cell::Cell()
 Cell::Cell(Cell_Container* CellCon)
 {
 	// use the cell defaults; 
-	container = CellCon;
+	
 	type = cell_defaults.type; 
 	type_name = cell_defaults.name; 
 	custom_data = cell_defaults.custom_data; 
@@ -371,7 +371,7 @@ Cell::Cell(Cell_Container* CellCon)
 	is_out_of_domain = false;
 	displacement.resize(3,0.0); // state? 
 	assign_orientation();
-	container = NULL;
+	container = CellCon;
 	set_total_volume( phenotype.volume.total ); 
 	return; 
 }

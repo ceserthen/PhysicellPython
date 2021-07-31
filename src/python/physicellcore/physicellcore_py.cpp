@@ -84,7 +84,7 @@ void Cell_Container_py::create_cell_container_for_microenvironment( BioFVM::Micr
     initialize( m.mesh.bounding_box[0], m.mesh.bounding_box[3], 
         m.mesh.bounding_box[1], m.mesh.bounding_box[4], 
         m.mesh.bounding_box[2], m.mesh.bounding_box[5],  mechanics_voxel_size );
-    m.agent_container = (BioFVM::Agent_Container*) this; //TODO FIX THIS
+    m.agent_container = this; //TODO FIX THIS
     return;
 }
 
