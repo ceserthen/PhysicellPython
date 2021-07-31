@@ -745,14 +745,14 @@ void add_PhysiCell_cells_to_open_xml_pugi_py( pugi::xml_document& xml_dom, std::
 			node_temp1 = node_temp1.parent(); 
 			index += size; 			
 			// custom variables 
-std::cout<< "start";
+
 			for( int i=0; i < (*CellCon.all_cells)[0]->custom_data.variables.size(); i++ )
 			{
 				size = 1; 
 				char szTemp [1024]; 
-std::cout<< " checkpoint 1";
+
 				strcpy( szTemp, (*CellCon.all_cells)[0]->custom_data.variables[i].name.c_str() ); 
-std::cout<< " checkpoint 2";
+
 				node_temp1 = node_temp1.append_child( "label" );
 				node_temp1.append_child( pugi::node_pcdata ).set_value( szTemp ); 
 				attrib = node_temp1.append_attribute( "index" ); 
@@ -777,10 +777,8 @@ std::cout<< " checkpoint 2";
 				node_temp1 = node_temp1.parent(); 
 				index += size; 			
 			}
-std::cout<< "2";
 			
 		}
-		std::cout<< "24";
 		node = node_temp; 
 		
 		if( !node.child( "filename" ) )
@@ -941,7 +939,6 @@ std::cout<< "2";
 	attrib.set_value( "individual" ); 
 
 	// now go through all cells 
-	std::cout<< "3";
 	root = node; 
 	for( int i=0; i < (*CellCon.all_cells).size(); i++ )
 	{
@@ -988,7 +985,6 @@ std::cout<< "2";
 			node = node.parent(); 
 			
 			node = node.parent(); // back up to transport processes 
-			std::cout<< "5";
 		}
 		
 		node = node.parent(); // back up to phenotype 
@@ -1021,7 +1017,6 @@ std::cout<< "2";
 		node.append_child( pugi::node_pcdata ).set_value( temp ); 		
 		
 		node = root;
-		std::cout<< "6";
 	}
 	
 	return; 

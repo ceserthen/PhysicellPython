@@ -626,18 +626,13 @@ void Cell::set_total_volume(double volume)
 	// phenotype.update_radius();
 	//if( get_container()->max_cell_interactive_distance_in_voxel[get_current_mechanics_voxel_index()] < 
 	//	phenotype.geometry.radius * parameters.max_interaction_distance_factor )
-	std::cout << "4" ;
-	std::cout << current_mechanics_voxel_index ;
-	std::cout<< get_container()->max_cell_interactive_distance_in_voxel[current_mechanics_voxel_index];
 	if( get_container()->max_cell_interactive_distance_in_voxel[current_mechanics_voxel_index] < 
 		phenotype.geometry.radius * phenotype.mechanics.relative_maximum_adhesion_distance )
 	{
 		// get_container()->max_cell_interactive_distance_in_voxel[get_current_mechanics_voxel_index()]= phenotype.geometry.radius*parameters.max_interaction_distance_factor;
-		std::cout << "5" ;
 		get_container()->max_cell_interactive_distance_in_voxel[get_current_mechanics_voxel_index()] = phenotype.geometry.radius
 			* phenotype.mechanics.relative_maximum_adhesion_distance;
 	}
-	std::cout << "6" ;
 	return; 
 }
 
