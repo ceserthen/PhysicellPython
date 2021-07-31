@@ -224,7 +224,7 @@ void Cell_Container_py::update_all_cells(double t, double phenotype_dt_ , double
 // making the create and save cell functions part of the 
 PhysiCell::Cell* Cell_Container_py::create_cell( void ){
 	std::cout << "1";
-	PhysiCell::Cell* pNew = new PhysiCell::Cell;	
+	PhysiCell::Cell* pNew = new PhysiCell::Cell(this);	
 	std::cout << "3";	 
     (*all_cells).push_back( pNew ); 
 		std::cout << "2";
@@ -241,8 +241,7 @@ std::cout << "5";
 
 PhysiCell::Cell* create_cell_py( Cell_Container_py& cellcontainer ){
 	std::cout << "1";
-	PhysiCell::Cell* pNew;
-	pNew = &PhysiCell::Cell;	
+	PhysiCell::Cell* pNew = new PhysiCell::Cell;		
 	std::cout << "3";	 
     (*cellcontainer.all_cells).push_back( pNew ); 
 		std::cout << "2";
