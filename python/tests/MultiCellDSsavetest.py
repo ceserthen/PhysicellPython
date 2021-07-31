@@ -8,6 +8,7 @@ Created on Thu Jul 29 14:44:49 2021
 import os
 os.environ["OMP_NUM_THREADS"] = "4"
 import sys
+import scipy.io
 sys.path.append('../../lib')
 from physicell import BioFVM
 from physicell import core

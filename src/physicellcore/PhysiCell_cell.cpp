@@ -327,33 +327,52 @@ void Cell::advance_bundled_phenotype_functions( double dt_ )
 Cell::Cell()
 {
 	// use the cell defaults; 
-	
 	type = cell_defaults.type; 
 	type_name = cell_defaults.name; 
-	
 	custom_data = cell_defaults.custom_data; 
 	parameters = cell_defaults.parameters; 
 	functions = cell_defaults.functions; 
 	
 	phenotype = cell_defaults.phenotype; 
-	
 	phenotype.molecular.sync_to_cell( this ); 
 	
 	// cell state should be fine by the default constructor 
-	
 	current_mechanics_voxel_index=-1;
-	
 	updated_current_mechanics_voxel_index = 0;
 	
 	is_movable = true;
 	is_out_of_domain = false;
 	displacement.resize(3,0.0); // state? 
-	
 	assign_orientation();
 	container = NULL;
-	
 	set_total_volume( phenotype.volume.total ); 
+	return; 
+}
+
+//pybind11 suport
+Cell::Cell(Cell_Container* CellCon)
+{
+	// use the cell defaults; 
 	
+	type = cell_defaults.type; 
+	type_name = cell_defaults.name; 
+	custom_data = cell_defaults.custom_data; 
+	parameters = cell_defaults.parameters; 
+	functions = cell_defaults.functions; 
+	
+	phenotype = cell_defaults.phenotype; 
+	phenotype.molecular.sync_to_cell( this ); 
+	
+	// cell state should be fine by the default constructor 
+	current_mechanics_voxel_index=-1;
+	updated_current_mechanics_voxel_index = 0;
+	
+	is_movable = true;
+	is_out_of_domain = false;
+	displacement.resize(3,0.0); // state? 
+	assign_orientation();
+	container = CellCon;
+	set_total_volume( phenotype.volume.total ); 
 	return; 
 }
 
@@ -588,6 +607,7 @@ bool Cell::assign_position(double x, double y, double z)
 
 void Cell::set_total_volume(double volume)
 {
+
 	Basic_Agent::set_total_volume(volume);
 	
 	// If the new volume is significantly different than the 
@@ -595,24 +615,24 @@ void Cell::set_total_volume(double volume)
 	// proportionally. 
 	
 	// if( fabs( phenotype.volume.total - volume ) < 1e-16 )
+
 	if( fabs( phenotype.volume.total - volume ) > 1e-16 )
 	{
 		double ratio= volume/ phenotype.volume.total;
 		phenotype.volume.multiply_by_ratio(ratio);
 	}
-	
+
 	phenotype.geometry.update( this, phenotype, 0.0 ); 
 	// phenotype.update_radius();
 	//if( get_container()->max_cell_interactive_distance_in_voxel[get_current_mechanics_voxel_index()] < 
 	//	phenotype.geometry.radius * parameters.max_interaction_distance_factor )
-	if( get_container()->max_cell_interactive_distance_in_voxel[get_current_mechanics_voxel_index()] < 
+	if( get_container()->max_cell_interactive_distance_in_voxel[current_mechanics_voxel_index] < 
 		phenotype.geometry.radius * phenotype.mechanics.relative_maximum_adhesion_distance )
 	{
 		// get_container()->max_cell_interactive_distance_in_voxel[get_current_mechanics_voxel_index()]= phenotype.geometry.radius*parameters.max_interaction_distance_factor;
 		get_container()->max_cell_interactive_distance_in_voxel[get_current_mechanics_voxel_index()] = phenotype.geometry.radius
 			* phenotype.mechanics.relative_maximum_adhesion_distance;
 	}
-	
 	return; 
 }
 
@@ -700,7 +720,6 @@ Cell_Container * Cell::get_container()
 	{
 		container = (Cell_Container *)get_microenvironment()->agent_container;
 	}
-	
 	return container;
 }
 

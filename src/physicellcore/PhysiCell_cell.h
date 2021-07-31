@@ -190,6 +190,7 @@ class Cell : public Basic_Agent
 	void die( void ); 
 	void step(double dt);
 	Cell();
+	Cell(Cell_Container* CellCon); //pybind11 support
 	
 	~Cell(); 
 	
