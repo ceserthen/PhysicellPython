@@ -1,13 +1,21 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
+Created on Sat Jul 31 00:42:14 2021
+
+@author: bscuser
+"""
+
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
 @author: tdiniaco
 """
 
 import xml.etree.ElementTree as ET
 class SaveSettings(object):
     def __init__(self,tree):
-        tree = ET.parse(settings_xml_fname)
+#        tree = ET.parse(settings_xml_fname)
         root = tree.getroot()
         
         #overall node
@@ -21,6 +29,12 @@ class SaveSettings(object):
         node = node.findall("interval")[0]
         self._interval = int(float(node.text))
         self._interval_units = node.attrib['units']
+        node = overall_node.findall("dt_diffusion")[0]
+        self.dt_diffusion = float(node.text)
+        node = overall_node.findall("dt_mechanics")[0]
+        self.dt_mechanics = float(node.text)
+        node = overall_node.findall("dt_phenotype")[0]
+        self.dt_phenotype = float(node.text)
     @property
     def max_time(self):
         return self._max_time
@@ -33,7 +47,8 @@ class SaveSettings(object):
     @property
     def interval_units(self):
         return self._interval_units
-class UserParameterSettings(object):        
+
+class UserParameterSettings(object):      
     def __init__(self,tree):
         root = tree.getroot()
         parameter_node = root.findall("user_parameters")[0]
@@ -69,8 +84,8 @@ class Parameters(object):
             self._parameter_value = int(self._parameter_value)
         if self._parameter_type=="double":
             self._parameter_value = float(self._parameter_value)
-#        if self._parameter_type=="float":
-#            self._parameter_valueint = double(self._parameter_value)
+        if self._parameter_type=="string":
+            self._parameter_valueint = str(self._parameter_value)
         return self._parameter_value           
         #
 class PhysicellSettings(object):
@@ -78,6 +93,7 @@ class PhysicellSettings(object):
         self._tree = ET.parse(settings_xml_fname)
         root = self._tree.getroot()
         self.user_parameters=UserParameterSettings(self._tree)
+        self.save_settings = SaveSettings(self._tree)
 #    def get_param_value(self):
         
         
