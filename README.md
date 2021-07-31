@@ -52,7 +52,7 @@ CMake is the build system for this project. There are several [precompliled bina
 ```
 ~/git/PhysicellPython$ mkdir build
 ~/git/PhysicellPython$ cd build
-~/git/PhysicellPython/build$
+~/git/PhysicellPython/build$ mkdir installed
 ```
 this installation provides custom compilers and paths
 ```
@@ -60,7 +60,7 @@ cmake  -DCMAKE_CXX_COMPILER=g++-11 -DCMAKE_C_COMPILER=gcc-11 \
 -DCMAKE_INSTALL_PREFIX:PATH=installed  \
 -DPYTHON_EXECUTABLE:FILEPATH=/Users/USERNAME/opt/anaconda3/bin/python \
 -DPYTHON_INCLUDE_DIR:PATH=/Users/USERNAME/opt/anaconda3/include/python3.8 \
--DPYTHON_LIBRARY:FILEPATH=/Users/USERNAME/opt/anaconda3/lib/libpython3.8.dylib 
+-DPYTHON_LIBRARY:FILEPATH=/Users/USERNAME/opt/anaconda3/lib/libpython3.8.dylib ..
 ```
 After setting the cmake configuration you can make and install the project.
 ```
