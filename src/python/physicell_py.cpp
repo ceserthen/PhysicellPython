@@ -835,6 +835,6 @@ PYBIND11_MODULE(physicell, p)
         ;
     pcore.def("save_MultiCellDS", &PhysiCellCore_py::save_PhysiCell_to_MultiCellDS_xml_pugi_py, "Save Physicell multicell datastructure", py::arg("filename"), py::arg("microenvironment"), py::arg("cell_container"), py::arg("current_simulation_time"));
     
-
+    pcore.def("create_cell_in_cellcontainer", &PhysiCellCore_py::create_cell_py , "add cells to the cell container", py::arg("cell container"));
 
 };

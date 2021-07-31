@@ -238,6 +238,27 @@ std::cout << "5";
 
     return pNew; 
 }
+
+PhysiCell::Cell* create_cell_py( Cell_Container_py& cellcontainer ){
+	std::cout << "1";
+	PhysiCell::Cell* pNew;
+	pNew = &PhysiCell::Cell;	
+	std::cout << "3";	 
+    (*cellcontainer.all_cells).push_back( pNew ); 
+		std::cout << "2";
+    pNew->index=(*cellcontainer.all_cells).size()-1;
+	std::cout << "4";
+
+    // All the phenotype and other data structures are already set 
+    // by virtue of the default Cell constructor. 
+std::cout << "5";
+    pNew->set_total_volume( pNew->phenotype.volume.total ); 
+
+    return pNew; 
+}
+
+
+
 PhysiCell::Cell* Cell_Container_py::create_cell( PhysiCell::Cell_Definition& cd ){
     PhysiCell::Cell* pNew = create_cell(); 
 	
