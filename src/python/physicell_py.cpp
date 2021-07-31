@@ -53,6 +53,7 @@
 #include "BioFVM/biofvm_py.h"
 #include "../physicellcore/PhysiCell.h"
 #include "physicellcore/physicellcore_py.h"
+#include "tests/biorobots_py.h"
 
 namespace py = pybind11;
 
@@ -831,6 +832,51 @@ PYBIND11_MODULE(physicell, p)
         ;
     pcore.def("save_MultiCellDS", &PhysiCellCore_py::save_PhysiCell_to_MultiCellDS_xml_pugi_py, "Save Physicell multicell datastructure", py::arg("filename"), py::arg("microenvironment"), py::arg("cell_container"), py::arg("current_simulation_time"));
     
+    py::class_<PhysiCell::PhysiCell_Globals>(m, "PhysiCell_Globals")
+            // .def(py::init<>());
+        // double current_time = 0.0; 
+        // double next_full_save_time = 0.0; 
+        // double next_SVG_save_time = 0.0; 
+        // int full_output_index = 0; 
+        // int SVG_output_index = 0; 
+            .def_readwrite("current_time", &PhysiCell::PhysiCell_Globals::current_time)
+            .def_readwrite("next_SVG_save_time", &PhysiCell::PhysiCell_Globals::next_SVG_save_time);
 
+
+        //py::class_<PhysiCell::Cell_Container::update_all_cells>(m, "PhysiCell_Globals")
+        // 	void update_all_cells(double t);  
+        // py::class_<PhysiCell::Cell_Container>(m, "Cell_Container")
+            // .def("update_all_cells", &PhysiCell::Cell_Container::update_all_cells(double t), py::arg("t") );
+            // .def("update_all_cells", &PhysiCell::Cell_Container::update_all_cells(double t), py::arg("t") );
+            // .def("update_all_cells", &PhysiCell::Cell_Container::update_all_cells<double> );
+
+
+
+    //    m.def("get_physicell_globals", &PhysiCell::get_physicell_globals, "Get global time values");
+        // m.def("create_cell_container_for_microenvironment", &PhysiCell::create_cell_container_for_microenvironment, "Create container for all cells");
+    pcore.def("create_cell_container2", &PhysiCell::create_cell_container2, "Create container for all cells");
+    pcore.def("get_cells_pos2D", &PhysiCell::get_cells_pos2D, "Get all x,y positions of 2D cells");
+    //    m.def("get_cells_x", &PhysiCell::get_cells_x, "Get all x positions of cells");
+    //    m.def("get_cells_y", &PhysiCell::get_cells_y, "Get all y positions of cells");
+    //    m.def("get_cells_types", &PhysiCell::get_cells_types, "Get types of all cells");
+    pcore.def("get_num_cells", &PhysiCell::get_num_cells, "Get number of cells");
+    pcore.def("update_all_cells", &PhysiCell::update_all_cells,"Update all cells at dt_diffusion", py::arg("t") = 0.01 );
+
+    m.def("get_microenvironment_options", &BioFVM::get_microenvironment_options, "Get the default microenv options");
+    m.def("initialize_microenvironment_leg", &BioFVM::initialize_microenvironment, "legacy version of the initialize microenvironment function");
+    pcore.def("load_PhysiCell_config_file", &PhysiCell::load_PhysiCell_config_file, "Load config params from XML");
+    
+    py::module_ biorobots  = p.def_submodule("biorobots", "biorobots test submodule of Physicell"); 
+
+    biorobots.def("setup_mircroenvironment_biorobots", &biorobots_py::setup_microenvironment, "setup the biorobots microenvironment");
+    biorobots.def("create_cell_types_biorobots", &biorobots_py::create_cell_types, "create cell types for the biorobots test");
+    biorobots.def("setup_tissue_biorobots", &biorobots_py::setup_tissue, "setup the tissue for biorobots");
+    biorobots.def("robot_coloring_function_biorobots", &biorobots_py::robot_coloring_function, "robot_coloring_function");
+    biorobots.def("worker_cell_rule_biorobots", &biorobots_py::worker_cell_rule, "setup the worker_cell_rule for biorobots");
+    biorobots.def("worker_cell_motility_biorobots", &biorobots_py::worker_cell_motility, "setup the worker_cell_motility for biorobots");
+    biorobots.def("cargo_cell_rule_biorobots", &biorobots_py::cargo_cell_rule, "setup the cargo_cell_rule for biorobots");
+    biorobots.def("director_cell_rule_biorobots", &biorobots_py::setup_tissue, "setup the director_cell_rule for biorobots");
+
+    
 
 };

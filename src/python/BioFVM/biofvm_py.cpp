@@ -38,7 +38,6 @@
 
 #include "biofvm_py.h"
 
-
 namespace BioFVM_py
 {
 

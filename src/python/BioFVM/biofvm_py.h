@@ -44,6 +44,17 @@
 #include "../../../src/physicellcore/PhysiCell_settings.h"
 #include "../../../src/physicellcore/PhysiCell_pugixml.h"
 
+namespace BioFVM{
+Microenvironment_Options default_microenvironment_options; 
+
+// add for pybind11; declare this function in the header too.
+Microenvironment_Options get_microenvironment_options(void)
+{
+	return default_microenvironment_options; 
+}
+
+};
+
 namespace BioFVM_py{
     
   class Microenvironment_py : public BioFVM::Microenvironment {

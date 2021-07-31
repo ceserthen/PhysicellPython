@@ -43,7 +43,16 @@
 #include "../BioFVM/biofvm_py.h"
 //TODO:Pathology
 //TODO:Various Outputs
-
+namespace PhysiCell{
+	// pybind11 functions originally created by @rheiland for https://github.com/rheiland/PyPhysiCell
+void create_cell_container2( double mechanics_voxel_size );
+// pybind11
+void update_all_cells(double t);
+// pybind11
+int get_num_cells( void );
+// pybind11
+std::vector<double> get_cells_pos2D( void );
+};
 namespace PhysiCellCore_py{
 
 class Cell_Container_py : public PhysiCell::Cell_Container {
